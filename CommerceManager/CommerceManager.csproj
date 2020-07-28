@@ -312,6 +312,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IndexBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <PropertyGroup>
