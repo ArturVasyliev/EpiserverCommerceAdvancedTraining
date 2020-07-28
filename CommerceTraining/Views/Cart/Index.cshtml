@@ -1,0 +1,73 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+
+@model CommerceTraining.Models.ViewModels.CartViewModel
+
+<div>
+    Hello cart
+    
+</div>
+
+<div>
+    Messages:
+    @Model.Messages
+
+    @*<ul>
+        @foreach (var item in Model.Messages)
+        {
+            <li>
+                Code: @item.ToString()
+
+            </li>
+        }
+    </ul>*@
+
+</div>
+
+ 
+<div>
+    Promotion messages:
+    @Model.PromotionMessages
+    @*<ul>
+        @foreach (var item in Model.PromotionMessages)
+        {
+            <li>
+                 @item
+
+            </li>
+        }
+    </ul>*@
+</div>
+
+<div>
+    LineItems
+    <ul>
+        @foreach (var item in Model.LineItems)
+        {
+            <li>
+                Code: @item.Code
+                Placed Price: @item.PlacedPrice.ToString("C")
+                Qty: @item.Quantity.ToString("####")
+            </li>
+        }
+    </ul>
+</div>
+
+<div>
+
+    Cart total: @Model.CartTotal
+</div>
+@*<div>
+    <div>@Html.ActionLink("Checkout","CheckOut")</div>
+</div>*@
+<div>
+    @*using (@Html.BeginForm("CheckIn", "MyBookings", new { BookingId = connection.BookingId, Url = Request.Url.ToString() }))*@
+    @using (@Html.BeginForm("Checkout", "Cart", @Model.AgreeWithSplitPayment))
+    {
+        <br /><br />
+        <label>Agree with gift card payment</label>
+     <input type="checkbox" id="agreeSplitPay" name="agreeSplitPay" value="@Model.AgreeWithSplitPayment" />
+    <br /><br />
+    <button class="btn btn-sm btn-link">Check Out</button>
+    } 
+</div>

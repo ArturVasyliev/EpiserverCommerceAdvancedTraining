@@ -1,0 +1,93 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+
+@model CommerceTraining.Models.ViewModels.SearchResultViewModel
+<div>
+    <h2>Search result</h2>
+</div>
+
+<div>
+    <b>Type specific:</b>
+</div>
+
+<div>
+    Nodes:
+    <ul>
+        @foreach (var item in Model.nodes)
+        {
+            <li>
+                @Html.ContentLink(item.ContentLink)
+            </li>
+        }
+    </ul>
+
+</div>
+
+<div>
+    Products:
+    <ul>
+        @foreach (var item in Model.products)
+        {
+            <li>
+                @Html.ContentLink(item.ContentLink)
+            </li>
+        }
+    </ul>
+
+</div>
+
+<div>
+    Variations:
+    <ul>
+        @foreach (var item in Model.variants)
+        {
+            <li>
+                @Html.ContentLink(item.ContentLink)
+            </li>
+        }
+    </ul>
+
+    <div>
+        <b>Generic (IContent)</b>
+    </div>
+    <ul>
+        @foreach (var item in Model.allContent)
+        {
+            <li>
+                @Html.ContentLink(item.ContentLink)
+            </li>
+        }
+    </ul>
+
+    <div>
+        <b>Facets</b>
+    </div>
+    <div>
+        <ul>
+            @foreach (var item in Model.facets)
+            {
+                <li>
+                    @item
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+@if (Model.Results != null)
+{
+    <p>
+        Your Search for <i> @Model.SearchQuery resulted in @Model.Results.Count() hits</i>
+    </p>
+    <div>
+        <ul>
+            @foreach (var item in Model.Results)
+            {
+                <li>
+                    <h4><a href="@item.Url">@item.Title</a></h4>
+                    @item.Excerpt
+                </li>
+            }
+        </ul>
+    </div>
+}

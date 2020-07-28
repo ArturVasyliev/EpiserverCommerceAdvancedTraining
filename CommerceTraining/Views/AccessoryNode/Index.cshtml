@@ -1,0 +1,21 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+@using CommerceTraining.SupportingClasses
+
+@model CommerceTraining.Models.Catalog.AccessoryNode
+
+<div>
+    @Html.PropertyFor(m => m.MainBody)
+</div>
+
+<div>
+    @{
+        foreach (EPiServer.Commerce.Catalog.ContentTypes.EntryContentBase item in 
+            ((CommerceTraining.Controllers.AccessoryNodeController)this.ViewContext.Controller).getThem(Model.ContentLink))
+        {
+            @Html.ContentLink(item.ContentLink);
+        <br />
+        }
+    }
+</div>
+

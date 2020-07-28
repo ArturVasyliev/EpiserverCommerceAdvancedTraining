@@ -1,0 +1,264 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+@using EPiServer.Web.Routing
+
+@model CommerceTraining.Models.ViewModels.AdminPageViewModel
+
+
+@{
+    Layout = "~/Views/Shared/Layouts/_LeftNavigation.cshtml";
+}
+
+
+
+<div>
+    @*@Html.PropertyFor(m => m.prices.FirstOrDefault())*@
+</div>
+
+@section RelatedContent
+{
+
+    <div>
+        <ul>
+            @*@foreach (var item in Model.OrderValues)
+                    {
+                        <li>
+                            @item.orderDate.ToShortDateString() : @item.PoTrackingNo
+                        </li>
+                    }
+                </ul>*@
+    </div>
+
+    <div>
+        Related content
+        <hr />
+        Warehouses:
+        <div>
+
+        </div>
+        <hr />
+    </div>
+}
+
+<h2>Pricing</h2>
+
+<div>
+    <ul>
+        @foreach (var item in Model.prices)
+        {
+            <li>@item.UnitPrice.Amount.ToString("C") - minQty: @item.MinQuantity.ToString("0")</li>
+        }
+    </ul>
+</div>
+
+<h2>Named image group</h2>
+@Model.imageInfo
+<div>
+    <img src="@Model.imageFromNamedGroup" />
+</div>
+
+@*Uncomment for the C7-lab*@
+<div>
+    @using (Html.BeginForm("CreateWithCode", "AdminPage"))
+    {
+        <div>
+            NodeName: <input type="text" name="nodeName" value="myNode" />
+        </div>
+
+        <div>
+            ProductName: <input type="text" name="productName" value="myProd" />
+        </div>
+        <div>
+            SkuName: <input type="text" name="skuName" value="mySku" />
+        </div>
+
+        <div>
+            <input type="submit" value="Create" />
+        </div>
+    }
+</div>
+
+<hr />
+<div>
+    Create Association
+    @using (Html.BeginForm("AddLabAssociations", "AdminPage"))
+    {
+        <div>
+            <input type="submit" value="Create" />
+        </div>
+    }
+</div>
+<hr />
+
+
+<hr />
+<div>
+    Create Market
+    @using (Html.BeginForm("CreateMarket", "AdminPage"))
+    {
+        <div>
+            <input type="submit" value="Create" />
+        </div>
+    }
+</div>
+<hr />
+
+    Create TaxCategory and Jurisdictions
+@using (Html.BeginForm("CreateTaxCategoryAndJurisdiction", "AdminPage"))
+{
+    <div>
+        <input type="submit" value="Create" />
+    </div>
+}
+
+Create Tax
+@using (Html.BeginForm("CreateTaxes", "AdminPage"))
+{
+    <div>
+        <input type="submit" value="Create" />
+    </div>
+}
+
+<hr />
+<div>
+    Create Warehouses
+    @using (Html.BeginForm("CreateWarehouses", "AdminPage"))
+    {
+        <div>
+            <input type="submit" value="Create" />
+        </div>
+    }
+</div>
+
+<div>
+    Edit Warehouse
+    @using (Html.BeginForm("EditWarehouse", "AdminPage"))
+    {
+        <div>
+            <input type="submit" value="Edit" />
+        </div>
+    }
+</div>
+
+<div>
+    Check on iIventoryRecord
+    @using (Html.BeginForm("CheckInventory", "AdminPage"))
+    {
+        <div>
+            <input type="submit" value="Check" />
+        </div>
+    }
+</div>
+
+<hr />
+<div>
+    Read BF data
+    @using (Html.BeginForm("ReadData", "AdminPage"))
+    {
+        <div>
+            <input type="submit" value="Read" />
+        </div>
+    }
+</div>
+
+<div>
+    Update BF data
+    @using (Html.BeginForm("UpdateData", "AdminPage"))
+    {
+        <div>
+            <input type="submit" value="Update" />
+        </div>
+    }
+</div>
+
+<div>
+    Create Club Card
+    @using (Html.BeginForm("CreateClubCard", "AdminPage"))
+    {
+        <div>
+            <input type="submit" value="Create" />
+        </div>
+    }
+</div>
+
+<div>
+    Create Enum Field
+    @using (Html.BeginForm("CreateEnumField", "AdminPage"))
+    {
+        <div>
+            <input type="submit" value="Create" />
+        </div>
+    }
+</div>
+
+<div>
+    Give Club Card To Admin
+    @using (Html.BeginForm("GiveClubCardToAdmin", "AdminPage"))
+    {
+        <div>
+            <input type="submit" value="Give Card" />
+        </div>
+    }
+</div>
+
+<div>
+    Set AccessRights
+    @using (Html.BeginForm("SetBfPermissions", "AdminPage"))
+    {
+        <div>
+            <input type="submit" value="Set permissions" />
+        </div>
+    }
+</div>
+
+<div>
+    Create Shipping stuff
+    @using (Html.BeginForm("CreateShippingOptions", "AdminPage"))
+    {
+        <div>
+            <input type="submit" value="Shipping" />
+        </div>
+    }
+</div>
+
+
+<hr />
+RoCe test-link
+<div>
+    Link From Controller
+    @using (Html.BeginForm("TestLink", "AdminPage"))
+    {
+        <div>
+            <input type="submit" value="Link" />
+        </div>
+    }
+</div>
+
+<div>
+    Link in HTML
+    <div>
+        @Html.ActionLink("DeadEnd", "DeadEnd", new { node = new ContentReference(25), id = "Hello" })
+    </div>
+</div>
+
+<div>
+    test BF issues
+    <div>
+        @Html.ActionLink("TestBF", "TestBF", new { id = "Hello" })
+    </div>
+</div>
+
+
+<div>
+    GetPoData
+    <div>
+        @Html.ActionLink("GetPoData", "GetPoData", new { id = "Hello" })
+    </div>
+</div>
+
+<div>
+    Arindam
+    <div>
+        @Html.ActionLink("GetArindamsPrices", "GetArindamsPrices", new { id = "" })
+    </div>
+</div>

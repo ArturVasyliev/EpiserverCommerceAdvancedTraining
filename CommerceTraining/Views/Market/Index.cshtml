@@ -1,0 +1,16 @@
+﻿@using EPiServer.Web.Routing
+@model  CommerceTraining.Models.ViewModels.MarketViewModel
+
+<head>
+    <title>Test</title>
+    <script src="@Url.Content("~/Scripts/Market.js")" type="text/javascript"></script>
+</head>
+
+@*@using (Html.BeginForm("Set", "Market", new { contentLink = @Model.ContentLink }))*@
+@using (Html.BeginForm("Set", "Market", new { @class = "jsMarketSelector" }))
+
+{
+    @Html.DropDownListFor(x => x.MarketId, Model.Markets)
+    @*<button type="submit">OK</button>*@
+    
+}

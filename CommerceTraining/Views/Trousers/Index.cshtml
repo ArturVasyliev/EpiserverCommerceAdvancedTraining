@@ -1,0 +1,111 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+
+@model CommerceTraining.Models.ViewModels.TrousersViewModel
+
+@{
+    Layout = "~/Views/Shared/Layouts/_LeftNavigation.cshtml";
+}
+
+@section RelatedContent
+{
+    @*Associations*@
+    <div>
+        <strong>Associated Entries (coded in the page itself)</strong>
+        <ul>
+            @foreach (var item in @Model.Associations)
+            {
+                <li>
+                    @Html.ContentLink(item)
+                </li>
+            }
+        </ul>
+    </div>
+
+    <div>
+        @Model.AssociationMetaData
+    </div>
+
+    <div>
+        <strong>Aggregated about the Association (AssocAggregated)</strong>
+        <ul>
+            @foreach (var item in @Model.AssocAggregated)
+            {
+                <li>
+                    @item.Key
+                </li>
+                @Html.ContentLink(item.Value)
+            }
+        </ul>
+    </div>
+
+
+
+
+    <hr />
+
+    <div>
+        <strong>
+            Customers who bought this item also bought
+        </strong>
+        @foreach (var item in @Model.BoughtThisBoughtThat)
+        {
+            <ul>
+                <li>
+                    @item
+                </li>
+            </ul>
+        }
+    </div>
+
+    <div>
+        @Html.PropertyFor(M => M.ProductArea)
+    </div>
+
+
+} @*End Related-Area*@
+
+<div>
+    Variant page
+</div>
+
+<div>
+    @Html.PropertyFor(m => m.MainBody)
+</div>
+
+<div>
+    <img src="@Model.image">
+</div>
+
+<div>
+    <strong>Default Price: </strong> @Html.PropertyFor(m => m.priceString)
+</div>
+
+<div>
+    <strong>Discount Price: </strong> @Html.PropertyFor(m => m.discountPrice.Money.Amount)
+</div>
+
+
+<div>
+    @using (Html.BeginForm("AddToCart", "Trousers"))
+    {
+        <div>
+            Quantity: <input type="text" name="Quantity" value="1" />
+        </div>
+        <div>
+            <input type="submit" value="Trousers only" />
+        </div>
+    }
+</div>
+
+
+<div>
+    @using (Html.BeginForm("AddTrousersAndSuspenders", "Trousers", new { accessoryName = "Suspenders_1" }))
+    {
+        <div>
+            <input type="submit" value="Trousers+Suspenders" />
+        </div>
+    }
+</div>
+
+

@@ -1,0 +1,22 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+
+@model CommerceTraining.Models.ViewModels.SearchResultViewModel
+
+@if (Model.Results != null)
+{
+    <p>
+        Your Search for <i> @Model.SearchQuery resulted in @Model.Results.Count() hits</i>
+    </p>
+    <div>
+        <ul>
+            @foreach (var item in Model.Results)
+            {
+                <li>
+                    <h4><a href="@item.Url">@item.Title</a></h4>
+                    @item.Excerpt       
+                </li>
+            }
+        </ul>
+    </div>
+}

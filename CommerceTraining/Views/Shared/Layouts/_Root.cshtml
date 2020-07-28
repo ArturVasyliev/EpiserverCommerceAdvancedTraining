@@ -1,0 +1,37 @@
+﻿@using EPiServer.Framework.Web.Mvc.Html
+@using EPiServer.Core
+@*@using AlloyTraining.Models.Pages;
+@using AlloyTraining.Models.ViewModels;*@
+
+@*@model IPageViewModel<SitePageData>*@
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    @*<title>@Model.CurrentPage.Name</title>*@
+    <title>CommerceTraining</title>
+    <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap.css")" />
+    <script type="text/javascript" src="@Url.Content("~/Scripts/jquery-3.0.0.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Scripts/bootstrap.js")"></script>
+
+</head>
+<body>
+    @* Renders quick naviation in top right corner*@
+    @Html.RenderEPiServerQuickNavigator()
+
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                @{Html.RenderPartial("Navigation");}
+            </div>
+            <div class="col-2 right">
+                <img src="~/Static/gfx/epi_edu-2.png" />
+            </div>
+        </div>
+        <hr />
+        @RenderBody()
+    </div>
+
+</body>
+</html>

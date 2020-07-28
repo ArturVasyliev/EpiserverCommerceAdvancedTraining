@@ -1,0 +1,39 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+
+@model CommerceTraining.Models.ViewModels.BlouseProductViewModel
+
+<div>
+    The Code: @Html.PropertyFor(m => m.CurrentContent.Code)
+</div>
+<div>
+    The Page: @Html.PropertyFor(m => m.CurrentPage.Name)
+</div>
+<hr />
+<div>
+    <div>Variations</div>
+    <ul>
+        @foreach (var item in Model.productVariations)
+        {
+            <li> @Html.ContentLink(item.ContentLink)</li>
+        }
+    </ul>
+</div>
+<div>
+    Here you will find all our interesting campaigns:
+    @Html.ContentLink(Model.campaignLink)
+</div>
+<hr />
+<div>
+    Create catalog items with code
+    <div>
+        @Html.ActionLink("Create with Code", "CreateWithCode")
+    </div>
+</div>
+<hr />
+<div>
+    Check relations
+    <div>
+        @Html.ActionLink("Check relations", "CheckRelations")
+    </div>
+</div>

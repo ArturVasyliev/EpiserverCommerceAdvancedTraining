@@ -1,0 +1,84 @@
+@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+
+@model CommerceTraining.Models.ViewModels.PageViewModel<CommerceTraining.Models.Pages.StartPage>
+
+@*@{
+    ViewBag.Title = "Index";
+}*@
+
+<div>
+    @Model.Customer
+</div>
+
+<div>
+    @Html.PropertyFor(m => m.CurrentPage.Name)
+</div>
+
+
+@*ToDo: uncomment/create when the categories exist (Mod. C)*@
+<div>
+    Top Level Categories
+    <ul>
+        @foreach (var item in Model.topLevelCategories)
+        {
+            <li>
+                @Html.ContentLink(item.ContentLink)
+            </li>
+        }
+    </ul>
+</div>
+
+<div>
+    Markets
+    @using (Html.BeginForm("Index", "StartPage", Model.selectedMarket))
+    {
+        foreach (var item in Model.markets)
+        {
+            <div class="radio">
+                @Html.RadioButtonFor(m => m.selectedMarket, item.MarketId.Value)
+                @Html.Label(item.MarketName)
+            </div>
+        }
+
+        <button type="submit">OK</button>
+    }
+</div>
+
+@*<div>
+    Test
+    <label>Market</label>
+    @{
+        Html.RenderAction("Index", "Market", new { contentLink = ContentReference.StartPage });
+    }
+</div>*@
+
+
+@*<div>
+    Markets2
+    @using (Html.BeginForm("SetMarket", "StartPage",FormMethod.Post))
+    {
+        @Html.DropDownListFor(x => x.selectedMarket, new SelectList(Model.markets, "MarketId", "MarketName"))
+        @Html.DropDownListFor(x => x.selectedMarket,Model.markets,new {object}))
+        <button type="submit">OK</button>
+    }
+</div>*@
+<div>
+    Selected market is 
+    @Model.selectedMarket
+</div>
+
+<hr />
+
+<div>
+    Some general info
+    <ul>
+        @foreach (var item in Model.someInfo)
+        {
+            <li>
+                @item
+            </li>
+        }
+    </ul>
+</div>
+

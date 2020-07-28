@@ -1,0 +1,22 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+@using EPiServer.Commerce.Catalog.ContentTypes
+ 
+@model CommerceTraining.Models.Catalog.ShirtProduct
+
+<div>
+
+    @Model.MainBody @*// ML: PropFor?*@
+
+    <div>
+        <ul>
+            Variations
+            @foreach (var item in @Model.GetVariants())
+            {
+                <li>@Html.ContentLink(item)</li>
+            }
+
+        </ul>
+    </div>
+
+</div>

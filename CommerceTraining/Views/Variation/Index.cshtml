@@ -1,0 +1,254 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+@using System.Globalization
+
+@model CommerceTraining.Models.ViewModels.ShirtVariationViewModel
+
+@{
+    Layout = "~/Views/Shared/Layouts/_LeftNavigation.cshtml";
+}
+
+@section RelatedContent
+{
+
+    <div>
+        <strong>Aggregated about the Association (AssocAggregated)</strong>
+        <ul>
+            @foreach (var item in @Model.AssocAggregated)
+            {
+                <li>
+                    @item.Key
+                </li>
+                // does not work
+                @Html.ContentLink(item.Value)
+            }
+        </ul>
+    </div>
+
+    <hr />
+
+    @*BoughtThisBoughtThat*@ @*Hard to do offline*@
+    <div>
+        <strong>
+            Customers who bought this item also bought
+        </strong>
+        @foreach (var item in @Model.BoughtThisBoughtThat)
+        {
+            <ul>
+                <li>
+                    @item
+                </li>
+            </ul>
+        }
+    </div>
+
+    <div>
+
+        <hr />
+        <strong>Warehouses:</strong>
+        <div>
+            <ul>
+                @foreach (var item in @Model.generalWarehouseInfo)
+                {
+                    <li>@item</li>
+                }
+            </ul>
+        </div>
+        <div>
+            <ul>
+                @foreach (var item in @Model.specificWarehouseInfo)
+                {
+                    <li>@item</li>
+                }
+            </ul>
+        </div>
+        <hr />
+    </div>
+
+    <div>
+        @using (Html.BeginForm("RequestInventory", "Variation", new { code = @Model.entryCode }))
+        {
+            <div>
+                <input type="submit" value="RequestInventory" />
+            </div>
+        }
+    </div>
+
+    <div>
+        @using (Html.BeginForm("CancelRequest", "Variation", new { code = @Model.entryCode }))
+        {
+            <div>
+                <input type="submit" value="CancelRequest" />
+            </div>
+        }
+    </div>
+
+<hr />
+<div>
+    @using (Html.BeginForm("SetInventory", "Variation"))
+    {
+        <div>
+            <input type="submit" value="Set inventory" />
+        </div>
+    }
+</div>
+
+<div>
+    @using (Html.BeginForm("UpdateInventory", "Variation"))
+    {
+        <div>
+            <input type="submit" value="Update inventory" />
+        </div>
+    }
+</div>
+
+    <div>
+        @Html.PropertyFor(M => M.ProductArea)
+    </div>
+
+
+} @* =============== End Related-Area =============== *@
+
+<div>
+    Variant page
+</div>
+
+<div>
+    @Model.VariationInfo
+</div>
+
+<div>
+    @Html.PropertyFor(m => m.MainBody)
+</div>
+
+<div>
+    <img src="@Model.image">
+</div>
+<br />
+<div>
+    @Model.PromoString
+</div>
+<br />
+<div>
+    <div>
+        <strong>
+            Current market:
+        </strong> @Model.currentMarket
+    </div>
+    <div>
+        Point of contact:
+        @Model.marketOwner
+
+    </div>
+</div>
+<div>
+    Market Warehouses
+    <ul>
+        @foreach (var item in @Model.localMarketWarehouses)
+        {
+            <li>@item</li>
+        }
+    </ul>
+</div>
+<hr />
+<div>
+    <strong>Default Price: </strong> @Html.PropertyFor(m => m.priceString)
+</div>
+
+
+<div>
+    <strong>Discount Saved Money: </strong> @Html.PropertyFor(m => m.betaDiscountPrice)
+</div>
+
+<div>
+    <strong>The customer group price:</strong> 
+    @*@Model.theRightPriceToPlace.ToString("C")*@
+    @Model.CustomerPricingPrice.UnitPrice.ToString()
+</div>
+
+@*<div>
+    <strong>Override Price(s)</strong>
+    <ul>
+        @foreach (Mediachase.Commerce.Pricing.IPriceValue item in Model.overridePrices)
+        {
+            <li>
+                @item.UnitPrice.ToString() @*
+                @item.CustomerPricing.PriceTypeId @item.CustomerPricing.PriceCode*@
+            @*</li>
+        }
+    </ul>
+</div>*@
+
+<div>
+    <strong>PricingLab price:</strong>
+    @Model.labPrice.UnitPrice.ToString()
+    @*@String.Format(new CultureInfo("sv-SE"), Model.labPrice.UnitPrice.Amount.ToString())*@
+
+    <div>...numbers are correct in the default and UK markets</div>
+</div>
+
+<hr />
+<div>
+    <strong>Tax info</strong>
+    <div>
+       Tax OldScool: @Model.Tax.ToString()
+
+        @*Tax: @String.Format(, @Model.Tax) @Model.Tax*@
+    </div>
+    <div>
+        Tax-String OldSchool
+        @{
+            foreach (var item in Model.TaxString)
+            {
+                @item
+            }
+        }
+    </div>
+    <div>
+        Tax NewSchool
+        @Model.TaxNewSchool
+    </div>
+    
+</div>
+<hr />
+<div>
+    @Html.CheckBoxFor(m => m.CanBeMonogrammed) Can have a monogram
+</div>
+
+@*...have to check the below*@
+@{
+    string Disabled = "";
+    if (!Model.VariationAvailability)
+    {
+        Disabled = "disabled";
+    }
+   
+}
+
+<div>
+    @using (Html.BeginForm("AddToCart", "Variation"))
+    {
+        <div>
+            Quantity: <input type="text" name="Quantity" value="1" />
+        </div>
+        <div>
+            Monogram: <input type="text" name="Monogram" />
+        </div>
+        <div>
+            @*...could use "button" instead*@
+            <input type="submit" value="Add to cart" @Disabled />
+        </div>
+    }
+</div>
+
+
+<div>
+    @using (Html.BeginForm("AddToWishList", "Variation"))
+    {
+        <div>
+            <input type="submit" value="Add to wishlist" />
+        </div>
+    }
+</div>
+
+<hr />

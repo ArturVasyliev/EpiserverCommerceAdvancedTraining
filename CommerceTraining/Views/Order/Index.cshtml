@@ -1,0 +1,15 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+
+@model CommerceTraining.Models.Pages.OrderViewModel
+
+<div>
+    Order Page
+</div>
+
+<div>
+    Your order number is:
+</div>
+<div>
+    @Html.PropertyFor(m => m.TrackingNumber)
+</div>

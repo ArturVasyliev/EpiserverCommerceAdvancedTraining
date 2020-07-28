@@ -1,0 +1,24 @@
+﻿@using EPiServer.Core
+
+@{
+    // Get a reference to the IContentRepository
+    var cr = EPiServer.ServiceLocation.ServiceLocator.Current.GetInstance<EPiServer.IContentRepository>();
+    // Get the child pages of the start page.
+    var childPages = cr.GetChildren<PageData>(ContentReference.StartPage);
+}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <ul class="navbar-nav">
+        <li class="nav-item active">
+            @Html.PageLink(ContentReference.StartPage, null, new { @class = "navbar-brand" })
+        </li>
+        @foreach (var page in childPages)
+        {
+            if (page.VisibleInMenu == true)
+            {
+                <li class="nav-item">
+                    @Html.PageLink(page, null, new { @class = "nav-item nav-link" })
+                </li>
+            }
+        }
+    </ul>
+</nav>

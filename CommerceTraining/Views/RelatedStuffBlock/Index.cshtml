@@ -1,0 +1,56 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+
+@model CommerceTraining.Models.ViewModels.RelatedStuffBlockViewModel
+
+@*<div>
+  @Html.PropertyFor(m => m.MainBody)
+</div>*@
+
+<div>
+    <strong>This is collected from inside the block </strong>
+</div>
+
+<div>
+    RelatingTo:
+    @Model.RelatingTo
+
+    cRef:
+    @*@Model.finalRef.WorkID.ToString()*@
+
+    entryContentBase:
+    @Model.theEntryContentBase.Code
+</div>
+
+<div>
+    Filtered on group:
+    @Model.Group
+</div>
+
+<div>
+    Why this type:
+    @Model.Type
+</div>
+
+<div>
+    BlockName: @Html.PropertyFor(m => m.Name)
+</div>
+
+<div>
+    ContentName:
+    @Html.PropertyFor(m => m.theContent)
+</div>
+
+<div>
+    ParentName:
+    @Html.PropertyFor(m => m.theParentContent)
+</div>
+
+<div>
+    <ul>
+        @foreach (var item in Model.associations)
+        {
+            <li>@Html.ContentLink(item)</li>
+        }
+    </ul>
+</div>

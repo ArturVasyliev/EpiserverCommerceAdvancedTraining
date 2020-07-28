@@ -1,0 +1,62 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+
+@model CommerceTraining.Models.ViewModels.SearchPageViewModel
+
+<div>
+  @Html.PropertyFor(m => m.CurrentPage.MainBody)
+</div>
+
+Search entries with Lucene.net
+<div>
+    @using (Html.BeginForm("Search", "Search", FormMethod.Post))
+    {
+        <input type="text" name="keyWord" />
+        <input type="submit" value="Go" />
+    }
+</div>
+
+Search entries with Find - Integrated
+<div>
+    @using (Html.BeginForm("FindIntegrated", "Search", FormMethod.Post))
+    {
+        <input type="text" name="keyWord" />
+        <input type="submit" value="Go" />
+    }
+</div>
+
+Search entries with Find - Native
+<div>
+    @using (Html.BeginForm("FindNative", "Search", FormMethod.Post))
+    {
+        <input type="text" name="keyWord" />
+        <input type="submit" value="Go" />
+    }
+</div>
+
+Search Unified with Find
+<div>
+    @using (Html.BeginForm("FindUnified", "Search", FormMethod.Post))
+    {
+        <input type="text" name="keyWord" />
+        <input type="submit" value="Go" />
+    }
+</div>
+
+Find Extras
+<div>
+    @using (Html.BeginForm("FindExtras", "Search", FormMethod.Post))
+    {
+        <input type="text" name="keyWord" />
+        <input type="submit" value="Go" />
+    }
+</div>
+
+Provider Model
+<div>
+    @using (Html.BeginForm("ProviderModelQuery", "Search", FormMethod.Post))
+    {
+        <input type="text" name="keyWord" />
+        <input type="submit" value="Go" />
+    }
+</div>

@@ -1,0 +1,27 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+@using CommerceTraining.SupportingClasses
+
+@*@model CommerceTraining.Models.ViewModels.LowLevelNodesViewModel*@
+@model CommerceTraining.Models.Pages.CatalogRoutingStartPage
+
+@*<div>
+  @Html.PropertyFor(m => m.modelMainBody)
+</div>
+
+<div>
+    Available categories
+    <ul>
+        @{
+            foreach (var item in Model.nodeReferences)
+            {
+                <li>@Html.ContentLink(item)</li>
+            }
+
+        }
+    </ul>
+</div>*@
+
+<div>
+    @Html.PropertyFor(m=> m.ProductArea)
+</div>

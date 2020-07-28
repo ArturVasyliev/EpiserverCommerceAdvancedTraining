@@ -1,0 +1,20 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+@model CommerceTraining.Models.Promotions.MyPercentagePromotion
+
+@{Layout = null;}
+
+<div>
+    <h1>My promotion...</h1> 
+    @Html.PropertyFor(m => m.Banner)
+</div>
+
+<div>
+    @Html.PropertyFor(m => m.Name)
+</div>
+
+
+<div>
+    @Html.PropertyFor(m => m.Description)
+</div>
+

@@ -1,0 +1,61 @@
+﻿@using EPiServer.Core
+@using EPiServer.Web.Mvc.Html
+@using EPiServer.Web.Routing
+
+@*@model CommerceTraining.Models.Catalog.FashionNodeViewModel*@ @*prev.*@
+@model CommerceTraining.SupportingClasses.NodeEntryCombo
+
+<div>
+    @*@Html.PropertyFor(m => m.node.Code) for the VM*@
+
+</div>
+
+<div>
+    @*@Html.PropertyFor(m => m.node.ContentType) for VM*@
+</div>
+
+@*Error with the below, no Node.Code... at the line above*@
+@*<div>
+        <img src="@UrlResolver.Current.GetUrl(Model.node.CommerceMediaCollection.FirstOrDefault().AssetLink)" />
+    </div>*@
+
+<div>
+    Nodes
+    <ul>
+        @*@foreach (var item in Model.childNodesCombo)
+            {
+                <li><a href="@item.url">@item.name</a> <img src="@item.resolverThumb" />  </li>
+                @*<li><a href="@item.url">@item.name</a> <img src="@item.imageUrl" height="20" width="10" /></li>*@ @*works*@
+                @*<li> <img src="@item.imageTumbUrl" /></li>
+                    <li> <img src="@item.imageCustomThumbUrl" /></li>*@
+                @*<li> <img src="@item.resolverImage"></li>
+                    <li> <img src="@item.resolverThumb"></li>*@
+
+
+                Without ViewModel: @*...sort of*@
+
+                @foreach (var item in Model.nodes)
+                {
+                    <li><a href="@item.url">@item.name</a> <img src="@item.imageTumbUrl" /></li>
+                }
+
+            </ul>
+        </div>
+
+        <div>
+            Entries
+            <ul>
+                @*@foreach (var item in Model.childEntriesCombo)
+                    {
+                                <li><a href="@item.url">@item.name</a> <img src="@item.resolverThumb" /></li>
+                    }*@
+                @foreach (var item in Model.entries)
+                {
+                    <li><a href="@item.url">@item.name</a> <img src="@item.imageTumbUrl" />  </li>
+                }
+            </ul>
+        </div>
+
+<div>
+    @Model.promotionMessage
+</div>
