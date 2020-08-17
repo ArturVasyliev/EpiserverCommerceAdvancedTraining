@@ -1,0 +1,45 @@
+﻿@model CommerceTraining.Models.ViewModels.PMSearchResultViewModel
+
+@{
+    ViewBag.Title = "ProviderModelQuery";
+}
+
+<h2>ProviderModelQuery</h2>
+
+<p>You are looking for results for the text: @Model.SearchQueryText</p>
+
+<p>Total number of items in result: @Model.ResultCount</p>
+
+<div>
+    <b>Facet List</b>
+    <ul>
+        @foreach (var group in Model.FacetGroups)
+        {
+            foreach (var facet in group.Facets)
+            {
+                <li>
+                    @Html.ActionLink(group.Name + " " + facet.Name + " " + facet.Count,
+                        "ProviderModelFilteredSearch", new { keyWord = Model.SearchQueryText, group = group.Name, facet = facet.Name })
+                </li>
+            }
+        }
+    </ul>
+</div>
+<b>Results</b>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Name</th><th scope="col">Color</th><th scope="col">Brand</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var item in Model.SearchResults)
+        {
+            <tr>
+                <th scope="row">@item["name"].Value</th>
+                <td>@(item["color"] == null ? "N/A" : String.Join(", ", item["color"].Values))</td>
+                <td>@(item["brand"] == null ? "N/A" : item["brand"].Value)</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,17 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Demo Search Page</h2>
+Provider Model
+<div>
+    @using (Html.BeginForm("ProviderModelQuery", "SearchDemo", FormMethod.Post))
+    {
+    <div class="form-search">
+        <input type="text" name="keyWord" />
+        <input type="submit" value="Go" />
+    </div>
+    }
+</div>
+

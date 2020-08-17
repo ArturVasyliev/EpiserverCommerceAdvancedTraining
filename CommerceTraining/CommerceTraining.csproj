@@ -426,6 +426,7 @@
     <Compile Include="Controllers\PromotionPageController.cs" />
     <Compile Include="Controllers\RelatedStuffBlockController.cs" />
     <Compile Include="Controllers\SearchController.cs" />
+    <Compile Include="Controllers\SearchDemoController.cs" />
     <Compile Include="Controllers\StartPageController.cs" />
     <Compile Include="Controllers\TrousersController.cs" />
     <Compile Include="Controllers\VariationController.cs" />
@@ -505,6 +506,7 @@
     <Compile Include="Models\ViewModels\NodeListingBlockViewModel.cs" />
     <Compile Include="Models\ViewModels\OrderViewModel.cs" />
     <Compile Include="Models\ViewModels\PageViewModel.cs" />
+    <Compile Include="Models\ViewModels\PMSearchResultViewModel.cs" />
     <Compile Include="Models\ViewModels\ProductBlockViewModel.cs" />
     <Compile Include="Models\ViewModels\RelatedStuffBlockViewModel.cs" />
     <Compile Include="Models\ViewModels\SearchPageViewModel.cs" />
@@ -662,6 +664,8 @@
     <Content Include="Scripts\popper.js.map" />
     <Content Include="Scripts\popper-utils.min.js.map" />
     <Content Include="Scripts\popper-utils.js.map" />
+    <Content Include="Views\SearchDemo\Index.cshtml" />
+    <Content Include="Views\SearchDemo\ProviderModelQuery.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
