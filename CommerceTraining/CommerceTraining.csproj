@@ -439,6 +439,7 @@
     <Compile Include="Infrastructure\CartAndCheckout\NewOrderEvents.cs" />
     <Compile Include="Infrastructure\EPiServerCommerceInitializationModule.cs" />
     <Compile Include="Infrastructure\EventReciever.cs" />
+    <Compile Include="Infrastructure\EventsDemoInitializationModule.cs" />
     <Compile Include="Infrastructure\FindCatalogConventions.cs" />
     <Compile Include="Infrastructure\MarketingInitialization.cs" />
     <Compile Include="Infrastructure\MyCookieService.cs" />

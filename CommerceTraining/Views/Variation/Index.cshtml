@@ -110,6 +110,18 @@
 } @* =============== End Related-Area =============== *@
 
 <div>
+    @using (Html.BeginForm("DoLowLevelDtoEdit", "Variation"))
+    {
+        <div>
+            New main body text: <input type="text" name="newText" />
+        </div>
+        <div>
+            <input type="submit" value="Dto Change Text" />
+        </div>
+    }
+</div>
+
+<div>
     Variant page
 </div>
 
