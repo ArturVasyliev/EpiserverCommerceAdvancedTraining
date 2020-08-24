@@ -1,0 +1,49 @@
+﻿@using Service_api_mvc_client.Models.ViewModels
+@model EntryViewModel
+
+@{
+    ViewBag.Title = "SingleEntry";
+}
+
+<h2>Single Entry</h2>
+<div class="alert alert-dark"><b>Code:</b> @Model.SelectedEntry.Code</div>
+<div class="alert alert-dark"><b>Name:</b> @Model.SelectedEntry.Name</div>
+<h6>Price</h6>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Unit Price</th>
+            <th scope="col">Currency</th>
+            <th scope="col">Code</th>
+            <th scope="col">Type</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var price in Model.Prices)
+        {
+            <tr>
+                <th scope="row">@price.UnitPrice</th>
+                <td>@price.CurrencyCode</td>
+                <td>@price.PriceCode</td>
+                <td>@price.PriceTypeId</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div>
+    <h6>MetaField Data</h6>
+    <ul>
+        @foreach(var prop in Model.SelectedEntry.MetaFields)
+        {
+            <li>
+                @prop.Name
+                <ul>
+                    @foreach(var data in prop.Data)
+                    {
+                        <li>@data.Value (@data.Language)</li>
+                    }
+                </ul>
+            </li>
+        }
+    </ul>
+</div>

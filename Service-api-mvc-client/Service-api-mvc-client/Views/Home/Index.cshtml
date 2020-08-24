@@ -1,0 +1,27 @@
+﻿@model EPiServer.Integration.Client.Models.Catalog.Entries
+
+@{
+    ViewBag.Title = "Service API Client Demo";
+}
+
+<h2>Entries List using Service API</h2>
+<p>The total number of Entries: @Model.TotalCount</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Code</th>
+            <th scope="col">Name</th>
+            <th scope="col">Type</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var entry in Model.EntryResults)
+        {
+            <tr>
+                <th scope="row">@Html.ActionLink(entry.Code, "SingleEntry", new { Code = entry.Code })</th>
+                <td>@entry.Name</td>
+                <td>@entry.EntryType</td>
+            </tr>
+        }
+    </tbody>
+</table>
