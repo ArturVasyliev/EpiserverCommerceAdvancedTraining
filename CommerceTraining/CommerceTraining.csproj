@@ -421,6 +421,7 @@
     <Compile Include="Controllers\FindUnifiedController.cs" />
     <Compile Include="Controllers\CatalogControllerBase.cs" />
     <Compile Include="Controllers\InventoryDemoController.cs" />
+    <Compile Include="Controllers\MarketController.cs" />
     <Compile Include="Controllers\MarketsDemoController.cs" />
     <Compile Include="Controllers\MyPackageController.cs" />
     <Compile Include="Controllers\NodeController.cs" />
@@ -444,6 +445,7 @@
     <Compile Include="Infrastructure\CartAndCheckout\CartAndCheckoutService.cs" />
     <Compile Include="Infrastructure\CartAndCheckout\CustomLineItemCalculator.cs" />
     <Compile Include="Infrastructure\CartAndCheckout\CustomTaxCalculator.cs" />
+    <Compile Include="Infrastructure\CartAndCheckout\CustomTaxValue.cs" />
     <Compile Include="Infrastructure\CartAndCheckout\DemoCustomTaxCalc.cs" />
     <Compile Include="Infrastructure\CartAndCheckout\OLDCustomTaxCalculator.cs" />
     <Compile Include="Infrastructure\CartAndCheckout\NewOrderEvents.cs" />
@@ -458,6 +460,7 @@
     <Compile Include="Infrastructure\MyCookieService.cs" />
     <Compile Include="Infrastructure\MyCustomCurrentMarket.cs" />
     <Compile Include="Infrastructure\MyCustomMarketService.cs" />
+    <Compile Include="Infrastructure\Pricing\BestPricingCalculatorEver.cs" />
     <Compile Include="Infrastructure\Pricing\CommonHelper.cs" />
     <Compile Include="Infrastructure\Pricing\CustomIPriceOptimizer.cs" />
     <Compile Include="Infrastructure\Pricing\CustomStoreHelper.cs" />
@@ -469,8 +472,12 @@
     <Compile Include="Infrastructure\Promotions\CustomPromotionEngineContentLoader.cs" />
     <Compile Include="Infrastructure\Promotions\Free2.cs" />
     <Compile Include="Infrastructure\Promotions\FreeItemPromotionProcessor.cs" />
+    <Compile Include="Infrastructure\Promotions\FreeStuffPromotion.cs" />
+    <Compile Include="Infrastructure\Promotions\FreeStuffPromotionProcessor.cs" />
     <Compile Include="Infrastructure\Promotions\MyPercentagePromotionProcessor.cs" />
     <Compile Include="Infrastructure\Promotions\MyPromotionGroupNames.cs" />
+    <Compile Include="Infrastructure\RemoveMeWhenCleaningUp.cs" />
+    <Compile Include="Infrastructure\Shipping\ShippingProcessor.cs" />
     <Compile Include="Infrastructure\StructureMapDependencyResolver.cs" />
     <Compile Include="Models\Blocks\IHasSettingsBlock.cs" />
     <Compile Include="Models\Blocks\NodeListingBlock.cs" />
@@ -481,6 +488,7 @@
     <Compile Include="Models\Catalog\BlouseProduct.cs" />
     <Compile Include="Models\Catalog\ClothesAccessory.cs" />
     <Compile Include="Models\Catalog\DefaultVariation.cs" />
+    <Compile Include="Models\Catalog\MyBundle.cs" />
     <Compile Include="Models\Catalog\MyPackage.cs" />
     <Compile Include="Models\Catalog\PoductLine.cs" />
     <Compile Include="Models\Catalog\ProductColor.cs" />
@@ -521,12 +529,14 @@
     <Compile Include="Models\ViewModels\FindUnifiedViewModel.cs" />
     <Compile Include="Models\ViewModels\InventoryDemoViewModel.cs" />
     <Compile Include="Models\ViewModels\LowLevelNodesViewModel.cs" />
+    <Compile Include="Models\ViewModels\MarketViewModel.cs" />
     <Compile Include="Models\ViewModels\NodeListingBlockViewModel.cs" />
     <Compile Include="Models\ViewModels\OrderViewModel.cs" />
     <Compile Include="Models\ViewModels\PageViewModel.cs" />
     <Compile Include="Models\ViewModels\PaymentDemoViewModel.cs" />
     <Compile Include="Models\ViewModels\PMSearchResultViewModel.cs" />
     <Compile Include="Models\ViewModels\ProductBlockViewModel.cs" />
+    <Compile Include="Models\ViewModels\ProjectedShirtViewModel.cs" />
     <Compile Include="Models\ViewModels\RelatedStuffBlockViewModel.cs" />
     <Compile Include="Models\ViewModels\SearchPageViewModel.cs" />
     <Compile Include="Models\ViewModels\SearchResultViewModel.cs" />
@@ -695,6 +705,7 @@
     <Content Include="Views\FindSearchDemo\Index.cshtml" />
     <Content Include="Views\FindSearchDemo\ProjectionResult.cshtml" />
     <Content Include="Views\MyPackage\Index.cshtml" />
+    <Content Include="Views\WareHouseDemo\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
