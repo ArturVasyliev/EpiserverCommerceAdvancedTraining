@@ -1,0 +1,52 @@
+﻿@using EPiServer.Find.Commerce
+@model CommerceTraining.Models.ViewModels.FindResultViewModel
+
+@{
+    ViewBag.Title = "FindQueryIntegrated";
+}
+
+<h2>Find Query Results</h2>
+
+<p>You are looking for results for the text: @Model.SearchText</p>
+
+<p>Total number of items in result: @Model.ResultCount</p>
+
+<b>Facet List</b>
+<ul>
+        @foreach (var facet in Model.ColorFacets)
+        {
+            <li>
+                @Html.ActionLink($"Color: {facet.Term} {facet.Count}",
+                    "FacetFilteredSearch", new { keyWord = Model.SearchText, facet = facet.Term })
+            </li>
+        }
+</ul>
+
+<b>Results</b>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Margin</th>
+            <th scope="col">Brand</th>
+            <th scope="col">Color</th>
+            <th scope="col">Default Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.ShirtVariants)
+        {
+            <tr>
+                <th scope="row">@Html.ContentLink(item.ContentLink)</th>
+                <td>@item.Margin</td>
+                <td>@item.Brand</td>
+                <td>@item.Color</td>
+                <td>
+                    @(item.DefaultPrice() == null ? "No default price" :
+                        item.DefaultPrice().UnitPrice.ToString())
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
