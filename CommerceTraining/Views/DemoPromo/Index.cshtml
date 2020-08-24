@@ -1,0 +1,76 @@
+﻿@model CommerceTraining.Models.ViewModels.DemoPromoViewModel
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Promotions Demo</h2>
+<h4>Available Items for Cart</h4>
+@using (Html.BeginForm("EvalPromos", "DemoPromo"))
+{
+    for (var i = 0; i < Model.CatalogItems.Count; i++)
+    {
+        <div class="form-row">
+            <div class="form-group col-3">
+                <label>Catalog Code</label>
+                @Html.EditorFor(m => m.CatalogItems[i].Code,
+               new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+            </div>
+            <div class="form-group col-1">
+                <label>Quantity</label>
+                @Html.EditorFor(m => m.CatalogItems[i].Quantity,
+               new { htmlAttributes = new { @class = "form-control"} })
+            </div>
+        </div>
+    }
+    <div class="form-row">
+        <div class="form-group">
+            <input type="submit" value="Submit" class="btn btn-primary" />
+        </div>
+    </div>
+}
+<h4>Rewards</h4>
+<ul>
+    @if (Model.Rewards != null)
+    {
+        foreach (var reward in Model.Rewards)
+        {
+            <li>@reward.Description</li>
+        }
+    }
+    else
+    {
+        <li>No Rewards</li>
+    }
+
+</ul>
+<h4>Added Cart Items</h4>
+<ul>
+    @if (Model.CartItems != null)
+    {
+        foreach (var item in Model.CartItems)
+        {
+            <li>@item.Code Qty: @item.Quantity</li>
+        }
+    }
+    else
+    {
+        <li>No Items in Cart</li>
+    }
+
+</ul>
+<h4>Promotion Items</h4>
+<ul>
+    @if (Model.PromoItems != null)
+    {
+        foreach (var item in Model.PromoItems)
+        {
+            <li>@item.EntryCode</li>
+        }
+    }
+    else
+    {
+        <li>No Promotion Items</li>
+    }
+</ul>
+

@@ -1,19 +1,15 @@
-﻿using EPiServer;
-using EPiServer.Commerce.Catalog;
+﻿using CommerceTraining.Infrastructure.Pricing;
+using EPiServer;
+using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Commerce.Marketing;
 using EPiServer.Commerce.Marketing.Internal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using EPiServer.Commerce.Order;
+using EPiServer.Commerce.Order.Internal;
 using EPiServer.Core;
 using Mediachase.Commerce;
-using EPiServer.Commerce.Order.Internal;
-using CommerceTraining.Infrastructure.Pricing;
-using Mediachase.Commerce.Pricing;
-using EPiServer.Commerce.Catalog.ContentTypes;
 using Mediachase.Commerce.Catalog;
+using Mediachase.Commerce.Pricing;
+using System.Linq;
 
 namespace CommerceTraining.Infrastructure.Promotions
 {

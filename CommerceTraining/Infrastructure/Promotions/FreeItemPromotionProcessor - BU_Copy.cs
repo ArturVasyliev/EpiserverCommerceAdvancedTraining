@@ -19,6 +19,8 @@ using EPiServer.Commerce.Order;
 
 namespace CommerceTraining.Infrastructure.Promotions
 {
+    // testing GiftItems promo
+    //[ServiceConfiguration(Lifecycle = ServiceInstanceScope.Singleton)]
     public class FreeItemPromotionProcessor : EntryPromotionProcessorBase<FreeItemPromotion>
     {
         // CollectionTargetEvaluator is used to evaluate an order against a promotion's target properties
@@ -30,9 +32,7 @@ namespace CommerceTraining.Infrastructure.Promotions
             CollectionTargetEvaluator targetEvaluator,
             FulfillmentEvaluator fulfillmentEvaluator,
             LocalizationService localizationService,
-            IContentLoader contentLoader,
-            RedemptionDescriptionFactory redemptionDescriptionFactory)
-            :base(redemptionDescriptionFactory)
+            IContentLoader contentLoader)
         {
             _contentLoader = contentLoader;
             _targetEvaluator = targetEvaluator;
@@ -40,7 +40,6 @@ namespace CommerceTraining.Infrastructure.Promotions
             _localizationService = localizationService;
         }
 
-        Injected<ReferenceConverter> _refConv; // lazy dev - fix
         protected override RewardDescription Evaluate(
              FreeItemPromotion data, PromotionProcessorContext ctx)
         {
@@ -48,23 +47,21 @@ namespace CommerceTraining.Infrastructure.Promotions
             IEnumerable<ContentReference> targetItems =
                 data.DiscountTargets.Items.ToList(); // get which LI this promo is for
 
-            // data - the promotion itself, and the custom model provided
-            // ctx - gives OrderGroup, OrderForm, Prices (PriceMatrix) & some calc
-
             var targets = data.DiscountTargets;
-            var freeItem = data.FreeItem.Items.First().ToReferenceWithoutVersion(); // just to show some
-            var freeItemCode = _refConv.Service.GetCode(freeItem); // Have RefConv. injected below
+            var freeItem = data.FreeItem.Items.First().ToReferenceWithoutVersion();
+            //var freeItemCode = ServiceLocator.Current.GetInstance<ReferenceConverter>().GetCode(freeItem);
+            var freeItemCode = _refConv.Service.GetCode(freeItem); // Have RefConv. below
 
             IOrderForm form = ctx.OrderForm;
             var lineItems = form.GetAllLineItems();
             //var lineItems = GetLineItems(ctx.OrderForm.get); // not anymore
             var matchRecursive = false; // mandatory
 
-            IList<string> skuCodes = _targetEvaluator.GetApplicableCodes(
+            var skuCodes = _targetEvaluator.GetApplicableCodes(
                 lineItems, targets.Items, targets.MatchRecursive); // get one if kicked in, 0 if not
 
-            FulfillmentStatus status = data.RequiredQty.GetFulfillmentStatus(
-                form, _targetEvaluator, _fulfillmentEvaluator); // extension method
+
+            FulfillmentStatus status = data.RequiredQty.GetFulfillmentStatus(form, _targetEvaluator, _fulfillmentEvaluator);
 
             List<RewardDescription> rewardDescriptions = new List<RewardDescription>();
             List<RedemptionDescription> redemptionDescriptions = new List<RedemptionDescription>();
@@ -72,26 +69,44 @@ namespace CommerceTraining.Infrastructure.Promotions
             // GetAllAffectedItems is the only method - name was changed
             var affectedItems = _targetEvaluator.GetApplicableCodes(lineItems, targetItems, matchRecursive);
 
-            // "FulfillmentEvaluator"  - not used much here - gives different statuses
-            //_fulfillmentEvaluator.GetStatusForSpendAmountPromotion() //... as an example
+            // only a single method to use on the "FulfillmentEvaluator"  - out commented
+            //var status = FulfillmentEvaluator.GetStatusForBuyQuantityPromotion(affectedItems.Select(x => x.LineItem)
+            //    , data.RequiredQty,0); // "Required" in the model 
 
-            // This way (demo) of using it is maybe not the intended, thought of like 
-            // "buy 5 - get one for free"
+            // This way (demo) of using it is maybe not the intended, thought of like "buy 5 - get one for free"
             // ...have to load the gift and add it to the cart
-            // ...have "Money", "Percentage", GiftItem, FreeItem etc.
+            // ...have "Money" and "Percentage" 
             return RewardDescription.CreateFreeItemReward(
                 status
-                , GetRedemptions(skuCodes, data, ctx) // explanation below
+                , GetRedemptions(skuCodes, data, ctx)
                 , data
                 , data.Description + " : " + freeItemCode
+
+                //status,
+                //affectedItems,
+                //data
+                //GetRewardDescriptionText(tagets, status, data)
                 );
         }
 
-        // new style
+        //Injected<RedemptionLimitService> r_srv;
+        //private IEnumerable<RedemptionDescription> GetRedemptions(IList<string> skuCodes, FreeItemPromotion data, PromotionProcessorContext ctx)
+        //{
+        //    //throw new NotImplementedException();
+        //    //r_srv.Service.GetRemainingRedemptions()
+        //    var redemptions = new List<RedemptionDescription>();
+        //    var affectedEntries = ctx.EntryPrices.ExtractEntries(
+        //        skuCodes
+        //        , 1);
+        //    redemptions.Add(CreateRedemptionDescription(affectedEntries));
+        //    return redemptions;
+        //}
+
+        // new
         private IEnumerable<RedemptionDescription> GetRedemptions(
-            IList<string> skuCodes
-            , FreeItemPromotion promotionData
-            , PromotionProcessorContext context)
+    IList<string> skuCodes
+    , FreeItemPromotion promotionData
+    , PromotionProcessorContext context)
         {
             /* 
              * Primary goal is to identify the objects to which the redemption should apply. 
@@ -113,10 +128,10 @@ namespace CommerceTraining.Infrastructure.Promotions
             {
                 // ExtractEntries ... 3:rd argument is "sort", if not defined we get "most expensive" first
                 // The ordering might be important, for example in the "Buy 3, get the cheapest for free".
-                // ...the method sits on the PriceMatrix
+                // the method sits on the PriceMatrix
                 var affectedEntries = context.EntryPrices.ExtractEntries(
                     skuCodes
-                    , 1, promotionData);
+                    , 1);
 
                 if (affectedEntries == null)
                 {
@@ -127,19 +142,44 @@ namespace CommerceTraining.Infrastructure.Promotions
             return redemptions;
         }
 
-        // could have some custom stuff here
-        protected override RedemptionDescription CreateRedemptionDescription(AffectedEntries affectedEntries)
-        {
-            return base.CreateRedemptionDescription(affectedEntries);
-        }
+        // out commented
+        //private string GetRewardDescriptionText(IList<AffectedItem> affectedItems
+        //    , Mediachase.Commerce.Marketing.FulfillmentStatus status
+        //    , FreeItemPromotion data)
+        //{
+        //    var contentNames = GetContentNames(affectedItems); // local method
 
-        // may want to customize
-        protected override RewardDescription NotFulfilledRewardDescription(FreeItemPromotion promotionData, PromotionProcessorContext context, FulfillmentStatus fulfillmentStatus)
-        {
-            return base.NotFulfilledRewardDescription(promotionData, context, fulfillmentStatus);
-        }
+        //    // Check out the free gift
+        //    var freeItemName = _contentLoader.Get<EntryContentBase>(data.FreeItem.Items.First()).Name; // only one item here
 
-        // just checking
+        //    // only checking "FulFilled" now (have "Partial" in the percentage-promo)
+        //    if (status == FulfillmentStatus.Fulfilled)
+        //    {
+        //        return String.Format(CultureInfo.InvariantCulture, "{0} for free when buying the item '{1}'!"
+        //            , freeItemName, contentNames);
+        //    }
+        //    else
+        //    {
+        //        return "No give-aways here";
+        //    }
+
+        //}
+
+        Injected<ReferenceConverter> _refConv;
+        // out commented
+        //private object GetContentNames(IList<AffectedItem> affectedItems)
+        //{
+        //    List<ContentReference> affectedContentReferences = new List<ContentReference>();
+        //    var affectedContentCodes = affectedItems.Select(x => x.LineItem.Code);
+        //    foreach (var item in affectedContentCodes)
+        //    {
+        //        affectedContentReferences.Add(_refConv.Service.GetContentLink(item));
+        //    }
+        //    var contentNames = _contentLoader.GetItems(affectedContentReferences, CultureInfo.InvariantCulture).Select(x => x.Name);
+
+        //    return String.Join(", ", contentNames);
+        //}
+
         protected override PromotionItems GetPromotionItems(FreeItemPromotion promotionData)
         {
             var targets = promotionData.DiscountTargets;
@@ -154,6 +194,7 @@ namespace CommerceTraining.Infrastructure.Promotions
 
         protected override bool CanBeFulfilled(FreeItemPromotion promotionData, PromotionProcessorContext context)
         {
+            //throw new NotImplementedException();
             return true;
         }
     }

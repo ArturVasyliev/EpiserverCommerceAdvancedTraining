@@ -23,7 +23,8 @@ using EPiServer.Commerce.Catalog.ContentTypes;
 
 namespace CommerceTraining.Infrastructure.Promotions
 {
-
+    // ... a promotion processor for "MyPercentagePromotion"
+    //[ServiceConfiguration(Lifecycle = ServiceInstanceScope.Singleton)]
     public class MyPercentagePromotionProcessor : EntryPromotionProcessorBase<MyPercentagePromotion>
     {
         /* The processor evaluates if a promotion should apply a reward to an order/Entry. 
@@ -62,7 +63,7 @@ namespace CommerceTraining.Infrastructure.Promotions
            ...that contains information about the current order/fakeCart. 
          */
 
-        protected override RewardDescription Evaluate(
+        protected override RewardDescription Evaluate(// note: it's OrderForm now... 
              MyPercentagePromotion promotionData // the model --> look in the UI to see the properties
             , PromotionProcessorContext context)
         {
@@ -70,8 +71,8 @@ namespace CommerceTraining.Infrastructure.Promotions
              * ...some properties are:
              *   - A list of redemption descriptions, one for each of the maximum amount of redemptions 
              *      ...that could be applied to the current order. 
-             *     This does not have to take redemption limits into consideration, that is handled 
-             *       by the promotion engine.
+             *     This does not have to take redemption limits into consideration, that is handled by the 
+             *      promotion engine.
              *   - A reward type. Depending on the type, the promotion value is read from the properties 
              *      UnitDiscount, Percentage or Quantity.
              *   - A status flag. Indicates if a promotion is not, partially, or fully fulfilled.
@@ -82,7 +83,20 @@ namespace CommerceTraining.Infrastructure.Promotions
             //context. // lots of things
             IEnumerable<ILineItem> lineItemsCheck = orderForm.GetAllLineItems();
             IEnumerable<ILineItem> lineItems = GetLineItems(context.OrderForm);
-            
+
+            #region Just Checking
+
+            //var e = _contentLoader.Get<EntryContentBase>(item0); 
+
+            //should check if it's applicable... at all
+
+            //var li = _orderFactory.Service.CreateLineItem(e.Code);
+            //li.Quantity = 1;
+            //li.PlacedPrice = 15;
+            //orderForm.Shipments.First().LineItems.Add(li);
+
+            #endregion
+
             // GetFulfillmentStatus - extension method
             FulfillmentStatus status = promotionData.MinNumberOfItems.GetFulfillmentStatus(
                 orderForm, _targetEvaluator, _fulfillmentEvaluator);
@@ -122,8 +136,7 @@ namespace CommerceTraining.Infrastructure.Promotions
             //   ... if no specific order is specified, MostExpensiveFirst is used.
             var affectedEntries = context.EntryPrices.ExtractEntries(
                 skuCodes,
-                1,
-                promotionData); // get one if it kicks in, null if not
+                1); // get one if it kicks in, null if not
 
             if (affectedEntries != null)
             {
@@ -137,7 +150,39 @@ namespace CommerceTraining.Infrastructure.Promotions
                 }
             }
 
-            
+            // could have a look here
+            switch (fulfillmentStatus)
+            {
+                case FulfillmentStatus.NotFulfilled:
+                    break;
+                case FulfillmentStatus.PartiallyFulfilled:
+                    break;
+                case FulfillmentStatus.Fulfilled:
+                    break;
+                case FulfillmentStatus.CouponCodeRequired:
+                    break;
+                case FulfillmentStatus.Excluded:
+                    break;
+                case FulfillmentStatus.VisitorGroupRequired:
+                    break;
+                case FulfillmentStatus.RedemptionLimitReached:
+                    break;
+                case FulfillmentStatus.NoMoneySaved:
+                    break;
+                case FulfillmentStatus.InvalidCoupon:
+                    break;
+                case FulfillmentStatus.InvalidCombination:
+                    break;
+                case FulfillmentStatus.MissingVisitorGroup:
+                    break;
+                case FulfillmentStatus.NoRedemptionRemaining:
+                    break;
+                case FulfillmentStatus.Ineffective:
+                    break;
+                default:
+                    break;
+            }
+
             // ... an extension method
             return RewardDescription.CreatePercentageReward(
                  fulfillmentStatus
@@ -150,7 +195,96 @@ namespace CommerceTraining.Infrastructure.Promotions
 
             #endregion
             
-        } 
+            #region Older stuff and debug - no show
+
+            #region Older not in use
+
+            //RewardDescription rewardDescription = new RewardDescription();
+
+            //var codes = _targetEvaluator.GetApplicableCodes(lineItems,)
+
+            //_fulfillmentEvaluator.GetStatusForBuyQuantityPromotion(
+            //    )
+
+            #endregion // new stuff
+
+            #region Previous version
+
+            //if (status.HasFlag(FulfillmentStatus.Fulfilled))
+            //{
+            //    return RewardDescription.CreateMoneyOrPercentageRewardDescription(
+            //        status,
+            //        redemptionDescriptions,
+            //        promotionData,
+            //        promotionData.PercentageDiscount,
+            //        context.OrderGroup.Currency,
+            //        "Custom promotion fulfilled"); // should have a more flexible way... GetDescription()
+
+            //}
+            //else
+            //{
+            //    return RewardDescription.CreateNotFulfilledDescription(
+            //        promotionData, FulfillmentStatus.NotFulfilled);
+            //}
+
+
+            #endregion
+
+            #region Debug
+
+            //RedemptionDescription rFirst;
+            //redemptionDescriptions.Add(CreateRedemptionDescriptionText(orderForm));
+
+            // below "if-construct" is for debug
+            //if (promotionData.PercentageDiscount <= 0) // ... return "sorry, no discount"
+            //{
+            //    return RewardDescription.CreatePercentageReward(
+            //        FulfillmentStatus.NotFulfilled,
+            //        redemptionDescriptions,
+            //        promotionData,
+            //        0,
+            //        CreateRewardDescriptionText(redemptionDescriptions.First(), FulfillmentStatus.NotFulfilled, promotionData));
+
+            //    /*RewardDescription.CreateMoneyOrPercentageRewardDescription(FulfillmentStatus.NotFulfilled,r,promotionData,null);*/
+            //}
+
+            //IEnumerable<ContentReference> targetItems = promotionData.DiscountTargets.Items.ToList(); // set by the Promo-UI
+
+            //bool matchRecursive = true; // walking down the catalog hierarchy
+            //var lineItems = GetLineItems(orderForm); // "GetLineItems" - in the base class (PromotionProcessorBase)
+            //var affectedItems = _targetEvaluator.GetApplicableItems(lineItems, targetItems, matchRecursive); // in CollectionTargetEvaluator
+            //var affectedItems = _targetEvaluator.GetApplicableCodes(orderForm.GetAllLineItems(), targetItems, false);
+
+
+            // small class --> just to get the status by the settings 
+            //var status = FulfillmentEvaluator.GetStatusForBuyQuantityPromotion(affectedItems.Select(x => x.LineItem)
+            //  , promotionData.MinNumberOfItems, promotionData.PartialFulfillmentNumberOfItems); // in the model
+            //var s = FulfillmentEvaluator.
+
+            //FulfillmentEvaluator ff = new FulfillmentEvaluator();
+
+            //if (rewardDescriptions.Any())
+            //{
+            //    return rewardDescriptions.First();
+            //}
+            //else
+            //{
+            //    return null;
+            //}
+
+
+            /*return RewardDescription.CreateMoneyOrPercentageRewardDescription(
+                status,
+                affectedItems,
+                promotionData,
+                promotionData.PercentageDiscount,
+                GetRewardDescriptionText(affectedItems, status, promotionData));*/
+
+            #endregion
+
+            #endregion
+
+        } // end RewardDescription
 
         // used
         private IEnumerable<RedemptionDescription> GetRedemptions(
@@ -181,8 +315,7 @@ namespace CommerceTraining.Infrastructure.Promotions
                 // the method sits on the PriceMatrix
                 var affectedEntries = context.EntryPrices.ExtractEntries(
                     skuCodes
-                    , 1
-                    ,promotionData);
+                    , 1);
 
                 if (affectedEntries == null)
                 {
@@ -193,7 +326,7 @@ namespace CommerceTraining.Infrastructure.Promotions
             return redemptions;
         }
 
-        // gets here either way (kicks in or not)
+        // gets here ether way (kicks in or not)
         protected override PromotionItems GetPromotionItems(MyPercentagePromotion promotionData)
         {
             var targets = promotionData.DiscountTargets;
@@ -208,6 +341,7 @@ namespace CommerceTraining.Infrastructure.Promotions
         }
 
         // used by promo-engine
+        // ToDo: check this one
         protected override bool CanBeFulfilled(MyPercentagePromotion promotionData, PromotionProcessorContext context)
         {
             if (DateTime.Now.DayOfWeek != DayOfWeek.Sunday)
@@ -216,6 +350,7 @@ namespace CommerceTraining.Infrastructure.Promotions
             }
             else
             {
+                //return (base.CanBeFulfilled(promotionData, context) && !ContentReference.IsNullOrEmpty(promotionData.Category));
                 return false;
             }
             
@@ -249,6 +384,60 @@ namespace CommerceTraining.Infrastructure.Promotions
 
             return "The promotion is not applicable for the current order.";
         }
+
+
+        #region Older style - not used
+
+        /* New style in latest NuGet*/
+        //// affectedItems is a collection - used for getting the names
+        //// Returns the names of all affected items combined into a string
+        //private string GetContentNames(IEnumerable<AffectedItem> affectedItems)
+        //{
+        //    var affectedContentLinks = affectedItems.Select(x => x.ContentLink);
+        //    var contentNames = _contentLoader.GetItems(affectedContentLinks, CultureInfo.InvariantCulture).Select(x => x.Name);
+
+        //    return String.Join(", ", contentNames);
+        //}
+
+        //Injected<ReferenceConverter> _refConv;
+        //private object GetContentNames(IEnumerable<AffectedItem> affectedItems)
+        /*    private object GetContentNames(IEnumerable<> affectedItems)
+        {
+            List<ContentReference> affectedContentReferences = new List<ContentReference>();
+            var affectedContentCodes = affectedItems.Select(x => x.LineItem.Code);
+            foreach (var item in affectedContentCodes)
+            {
+                affectedContentReferences.Add(_refConv.Service.GetContentLink(item));
+            }
+            var contentNames = _contentLoader.GetItems(affectedContentReferences, CultureInfo.InvariantCulture).Select(x => x.Name);
+
+            return String.Join(", ", contentNames);
+        }*/
+
+        //public virtual RedemptionDescription CreateRedemptionDescriptionText(IOrderForm orderForm)
+        //{
+        //    // not used right now
+        //    // Should check PromotionData.RedemptionLimits Qty and "AffectedEntries"
+        //    throw new NotImplementedException();
+        //}
+
+        //protected override bool CanBeFulfilled(MyPercentagePromotion promotionData, PromotionProcessorContext context)
+        //{
+        //    // Should here check if any LineItems are affected in the OrderGroup
+        //    return true;
+        //}
+
+        //protected override PromotionItems GetPromotionItems(MyPercentagePromotion promotionData)
+        //{
+        //    // this example is very narrow... but it's for this specific Model/Processor
+        //    return new PromotionItems(
+        //        promotionData
+        //        , new CatalogItemSelection(promotionData.DiscountTargets.Items, CatalogItemSelectionType.All, false)
+        //        , new CatalogItemSelection(promotionData.DiscountTargets.Items, CatalogItemSelectionType.All, false)
+        //        );
+        //}
+
+        #endregion
 
     }
 }

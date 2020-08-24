@@ -76,7 +76,7 @@ namespace CommerceTraining.Infrastructure.Promotions
                 new List<RedemptionDescription>();
 
             var maxRedemptions = GetMaxRedemptions(promotionData.RedemptionLimits);
-            var affectedEntries = context.EntryPrices.ExtractEntries(applicableEntryCodes, 1, promotionData);
+            var affectedEntries = context.EntryPrices.ExtractEntries(applicableEntryCodes, 1);
 
             for (int i = 0; i < maxRedemptions; i++)
             {
@@ -97,6 +97,28 @@ namespace CommerceTraining.Infrastructure.Promotions
 
             return null;
         }
-        
+
+        //protected override RewardDescription Evaluate(FreeItemPromotion promotionData
+        //    , PromotionProcessorContext context)
+        //{
+        //    // form needed
+        //    IOrderForm form = context.OrderForm;
+
+        //    // status needed 
+        //    FulfillmentStatus status = promotionData.RequiredQty.GetFulfillmentStatus(
+        //        form
+        //        , _collectionTargetEvaluator
+        //        , _fulfillmentEvaluator
+        //        );
+
+
+        //    return RewardDescription.CreateFreeItemReward(
+        //        status
+        //        , GetRedemptions()
+        //        , promotionData
+        //        , "This is the Free2 promotion that kicked in");
+        //}
+
+
     }
 }
