@@ -1,0 +1,140 @@
+﻿@model CommerceTraining.Models.ViewModels.PaymentDemoViewModel
+@using CommerceTraining.Controllers
+@{
+
+                ViewBag.Title = "Index";
+}
+
+<h2>Payment Demo</h2>
+@foreach (var item in Model.Variants)
+{
+    using (Html.BeginForm("UpdateCart", "PaymentDemo"))
+    {
+        <div class="container border-bottom">
+            <div class="row mb-4 mt-4">
+                <div class="col-4">
+                    <span class="h5">@item.DisplayName</span>
+                    @if (item.RequireSpecialShipping)
+                    {
+                        <div class="alert-info">Special Shipping Required</div>
+                    }
+                </div>
+                <div class="col-3">
+                    <img src="@Html.UrlResolver(item)" />
+                </div>
+                <div class="form-group col-2">
+                    <label>Set Quantity for Cart:</label>
+                    @Html.TextBox("PurchaseQuantity", '0',
+                    new { @class = "form-control", @type = "number", @min = "0" })
+                    <input type="submit" value="Add/Update Cart" class="btn btn-primary mt-3" />
+                    @Html.Hidden("itemCode", item.Code)
+                </div>
+            </div>
+        </div>     
+    }
+}
+
+<h4>Cart Items</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Item Code</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Placed Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.CartItems)
+        {
+            <tr>
+                <th scope="row">@item.Code</th>
+                <td>@item.Quantity</td>
+                <td>@item.PlacedPrice</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="alert-info mb-5">
+    <h6>Cart Total: @Model.CartTotal</h6>
+</div>
+
+
+<h6>Gift Cards</h6>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Primary Key Id</th>
+            <th scope="col">Balance</th>
+            <th scope="col">Active</th>
+            <th scope="col">RedemtionCode</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.GiftCards)
+        {
+            <tr>
+                <td>@item.PrimaryKeyId</td>
+                <td>@item["Balance"]</td>
+                <td>@item["IsActive"]</td>
+                <td>@item["RedemtionCode"]</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<h4>Purchase Simulator</h4>
+@using (Html.BeginForm("SimulatePurchase", "PaymentDemo"))
+{
+    <div class="container mb-5">
+        <div class="form-row">
+            <div class="form-group col-3">
+                <label>Select primary payment method:</label>
+                @Html.DropDownListFor(m => m.SelectedPaymentId,
+                    new SelectList(Model.PayMethods, "PaymentMethodId", "Name"),
+                    new { @class = "form-control" })
+            </div>
+            <div class="form-group col-3">
+                <label>Select primary shipping method:</label>
+                @Html.DropDownListFor(m => m.SelectedShippingMethodId,
+                            new SelectList(Model.ShippingMethods, "ShippingMethodId", "Name"),
+                            new { @class = "form-control" })
+            </div>
+        </div>
+        @if (Model.GiftCards.Count() > 0)
+        {
+            <div class="alert-info h6">
+                Gift Card Available
+            </div>
+            <div class="form-row">
+                <div class="form-group col-2">
+                    <div class="form-check">
+                        @Html.EditorFor(m => m.UseGiftCard,
+                       new { htmlAttributes = new { @class = "form-check-input" } })
+                        <label class="form-check-label" for="UseGiftCard">Use Gift Card</label>
+                    </div>
+                </div>
+                <div class="form-group col-2">
+                    <label>Enter Amount:</label>
+                    @Html.EditorFor(m => m.GiftCardDebitAmt, new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                <div class="form-group col-3">
+                    <label>Redemption Code:</label>
+                    @Html.EditorFor(m => m.RedemtionCode, new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+        }
+        <div class="form-row">
+            <div class="form-group">
+                <input type="submit" value="Purchase" class="btn btn-primary" />
+
+            </div>
+        </div>
+        @if (!String.IsNullOrEmpty(Model.MessageOutput))
+        {
+            <div class="alert-info">@Model.MessageOutput</div>
+        }
+        @if (!String.IsNullOrEmpty(Model.GiftInfoMessage))
+        {
+            <div class="alert-info">@Model.GiftInfoMessage</div>
+        }
+    </div>
+}

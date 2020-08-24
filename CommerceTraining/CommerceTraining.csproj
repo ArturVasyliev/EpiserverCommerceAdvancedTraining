@@ -424,6 +424,7 @@
     <Compile Include="Controllers\NodeListingBlockController.cs" />
     <Compile Include="Controllers\OrderController.cs" />
     <Compile Include="Controllers\OrderControllerBase.cs" />
+    <Compile Include="Controllers\PaymentDemoController.cs" />
     <Compile Include="Controllers\ProductBlockController.cs" />
     <Compile Include="Controllers\ProductController.cs" />
     <Compile Include="Controllers\PromotionPageController.cs" />
@@ -518,6 +519,7 @@
     <Compile Include="Models\ViewModels\NodeListingBlockViewModel.cs" />
     <Compile Include="Models\ViewModels\OrderViewModel.cs" />
     <Compile Include="Models\ViewModels\PageViewModel.cs" />
+    <Compile Include="Models\ViewModels\PaymentDemoViewModel.cs" />
     <Compile Include="Models\ViewModels\PMSearchResultViewModel.cs" />
     <Compile Include="Models\ViewModels\ProductBlockViewModel.cs" />
     <Compile Include="Models\ViewModels\RelatedStuffBlockViewModel.cs" />
@@ -682,6 +684,7 @@
     <Content Include="Views\MarketsDemo\Index.cshtml" />
     <Content Include="Views\InventoryDemo\Index.cshtml" />
     <Content Include="Views\BisFound\Index.cshtml" />
+    <Content Include="Views\PaymentDemo\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

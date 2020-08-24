@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomBfHandler", "CustomBfHandler\CustomBfHandler.csproj", "{4597B470-C38D-4983-B9FE-4FB7ABF4855A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AcmePaymentProvider", "AcmePaymentProvider\AcmePaymentProvider.csproj", "{EC3D412B-B726-4E4D-AD6F-01A51B91E77A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{4597B470-C38D-4983-B9FE-4FB7ABF4855A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4597B470-C38D-4983-B9FE-4FB7ABF4855A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4597B470-C38D-4983-B9FE-4FB7ABF4855A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC3D412B-B726-4E4D-AD6F-01A51B91E77A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC3D412B-B726-4E4D-AD6F-01A51B91E77A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC3D412B-B726-4E4D-AD6F-01A51B91E77A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC3D412B-B726-4E4D-AD6F-01A51B91E77A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

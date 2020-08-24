@@ -316,6 +316,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AcmePaymentProvider\AcmePaymentProvider.csproj">
+      <Project>{ec3d412b-b726-4e4d-ad6f-01a51b91e77a}</Project>
+      <Name>AcmePaymentProvider</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CustomBfHandler\CustomBfHandler.csproj">
       <Project>{4597b470-c38d-4983-b9fe-4fb7abf4855a}</Project>
       <Name>CustomBfHandler</Name>
