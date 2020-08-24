@@ -1,0 +1,206 @@
+﻿@model CommerceTraining.Models.ViewModels.InventoryDemoViewModel
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Inventory Demo</h2>
+<div class="container">
+    <div class="row">
+        <div class="col-4">
+            @Model.Shirt.DisplayName
+        </div>
+        <div class="col-4">
+            <img src="@Model.ImageUrl" />
+        </div>
+    </div>
+</div>
+<h4>Inventory Information</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Warehouse</th>
+            <th scope="col">Is Tracked</th>
+            <th scope="col">Purchase Avl.</th>
+            <th scope="col">Purchase Req.</th>
+            <th scope="col">Backorder Avl.</th>
+            <th scope="col">Backorder Req.</th>
+            <th scope="col">Preorder Avl.</th>
+            <th scope="col">Preorder Req.</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var inv in Model.Inventories)
+        {
+            <tr>
+                <th scope="row">@inv.WarehouseCode</th>
+                <td>@inv.IsTracked</td>
+                <td>@inv.PurchaseAvailableQuantity</td>
+                <td>@inv.PurchaseRequestedQuantity</td>
+                <td>@inv.BackorderAvailableQuantity</td>
+                <td>@inv.BackorderRequestedQuantity</td>
+                <td>@inv.PreorderAvailableQuantity</td>
+                <td>@inv.PreorderRequestedQuantity</td>
+                <td>
+                    @Html.ActionLink("Edit", "EditInventory",
+               new { code = inv.CatalogEntryCode, warehouseCode = inv.WarehouseCode })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@if (Model.SelectedInvRecord != null)
+{
+    <h4>Edit Inventory</h4>
+    using (Html.BeginForm("UpdateInventory", "InventoryDemo"))
+    {
+        <div class="container">
+            <div class="form-row align-items-center">
+                <div class="form-group col">
+                    <label>Product Code</label>
+                    @Html.EditorFor(m => m.SelectedInvRecord.CatalogEntryCode,
+                   new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                </div>
+                <div class="form-group col">
+                    <label>Warehouse Code</label>
+                    @Html.EditorFor(m => m.SelectedInvRecord.WarehouseCode,
+                   new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                </div>
+                <div class="form-group col my-1">
+                    <div class="form-check">
+                        @Html.EditorFor(m => m.SelectedInvRecord.IsTracked,
+                       new { htmlAttributes = new { @class = "form-check-input" } })
+                        <label class="form-check-label" for="SelectedInvRecord_IsTracked">Is Tracked</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col">
+                    <label>Available to Purchase</label>
+                    @Html.EditorFor(m => m.SelectedInvRecord.PurchaseAvailableQuantity,
+                   new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                <div class="form-group col">
+                    <label>Available for Backorder</label>
+                    @Html.EditorFor(m => m.SelectedInvRecord.BackorderAvailableQuantity,
+                   new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                <div class="form-group col">
+                    <label>Available to Preorder</label>
+                    @Html.EditorFor(m => m.SelectedInvRecord.PreorderAvailableQuantity,
+                   new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col">
+                    <label>Requested to Purchase</label>
+                    @Html.EditorFor(m => m.SelectedInvRecord.PurchaseRequestedQuantity,
+                   new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                <div class="form-group col">
+                    <label>Requested for Backorder</label>
+                    @Html.EditorFor(m => m.SelectedInvRecord.BackorderRequestedQuantity,
+                   new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                <div class="form-group col">
+                    <label>Requested to Preorder</label>
+                    @Html.EditorFor(m => m.SelectedInvRecord.PreorderRequestedQuantity,
+                   new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col">
+                    <label>Date available to purchase</label>
+                    @Html.EditorFor(m => m.SelectedInvRecord.PurchaseAvailableUtc,
+                   new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                <div class="form-group col">
+                    <label>Date available to backorder</label>
+                    @Html.EditorFor(m => m.SelectedInvRecord.BackorderAvailableUtc,
+                   new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                <div class="form-group col">
+                    <label>Date available to preorder</label>
+                    @Html.EditorFor(m => m.SelectedInvRecord.PreorderAvailableUtc,
+                   new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-4">
+                    <label>Reorder Min. Quantity</label>
+                    @Html.EditorFor(m => m.SelectedInvRecord.ReorderMinQuantity,
+                   new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                <div class="form-group col-4">
+                    <label>Additional Quantity</label>
+                    @Html.EditorFor(m => m.SelectedInvRecord.AdditionalQuantity,
+                   new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+            <div class="form-row mb-4">
+                <div class="form-group">
+                    <input type="submit" value="Submit" class="btn btn-primary" />
+                    @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-primary" })
+                </div>
+            </div>
+        </div>
+
+    }
+}
+@if (Model.SelectedInvRecord == null)
+{
+    <h4>Purchase Simulator</h4>
+    using (Html.BeginForm("SimulatePurchase", "InventoryDemo"))
+    {
+        <div class="container">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Select a Warehouse</label>
+                    @Html.DropDownListFor(m => m.SelectedWarehouseCode,
+                        new SelectList(Model.Inventories, "WarehouseCode", "WarehouseCode"),
+                        new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-2">
+                    <label>Enter Quantity</label>
+                    @Html.EditorFor(m => m.PurchaseQuantity,
+                       new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+
+            @if (Model.OperationKeys != null && Model.OperationKeys.Count > 0)
+            {
+                for (var i = 0; i < Model.OperationKeys.Count; i++)
+                {
+                    <div class="form-row">
+                        <div class="form-group col-12">
+                            <label>Operation Key (Normally stored with a Shipment)</label>
+                            @Html.EditorFor(m => m.OperationKeys[i],
+                                 new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                        </div>
+                    </div>
+                }
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="submit" value="Complete Purchase" formaction=@Url.Action("CompletePurchase") class="btn btn-primary" />
+                        <input type="submit" value="Cancel Purchase" formaction=@Url.Action("CancelPurchase") class="btn btn-primary" />
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="submit" value="Purchase" class="btn btn-primary" />
+                        @if (!String.IsNullOrEmpty(Model.MessageOutput))
+                        {
+                            <label>@Model.MessageOutput</label>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+
