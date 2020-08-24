@@ -1,0 +1,22 @@
+﻿@using EPiServer.Commerce.Catalog.ContentTypes
+@model CommerceTraining.Models.ViewModels.DemoMarketsViewModel
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Default Markets Demo</h2>
+
+@using (Html.BeginForm("ChangeDefaultMarket", "MarketsDemo"))
+{
+    @Html.DropDownListFor(m => m.SelectedMarket,
+    new SelectList(Model.MarketList, "MarketId", "MarketName"),
+    "-Please select a Market-",
+    new { @onchange = "this.form.submit();"})
+}
+
+<h4>Current Market Selected: @Model.SelectedMarket.MarketName</h4>
+<h4>Shirt Details</h4>
+@Html.PropertyFor(m => m.Shirt.Name)
+Price based on current market: @Model.Shirt.GetDefaultPrice().UnitPrice.ToString()
+
