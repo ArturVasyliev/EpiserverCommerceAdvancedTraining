@@ -1,0 +1,113 @@
+﻿@model CommerceTraining.Models.ViewModels.BisFoundViewModel
+
+@{
+    ViewBag.Title = "BisFundDemo";
+}
+
+<h2>Business Foundation Demo</h2>
+<div class="border-info">
+    <p>@(Model.ClubCardExists ? "Club Card exists" : "Club Card doesn't exist.")</p>
+    @Html.ActionLink("Create ClubCard MetaClass", "CreateClubCardClass", null, Model.ClubCardExists ?
+    new { @class = "btn btn-primary disabled"} : new { @class = "btn btn-primary" })
+    @Html.ActionLink("Delete ClubCard MetaClass", "DeleteClubCardClass", null, Model.ClubCardExists ?
+    new { @class = "btn btn-primary"} : new { @class = "btn btn-primary disabled" })
+</div>
+@if (Model.ClubCardExists)
+{
+    <h4>Club Cards</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Title</th>
+                <th scope="col">Primary Key Id</th>
+                <th scope="col">Card Owner</th>
+                <th scope="col">Email</th>
+                <th scope="col">Contact Id</th>
+                <th scope="col">Balance</th>
+                <th scope="col">Card Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.ClubCards)
+            {
+            <tr>
+                <th scope="row">@item["TitleField"]</th>
+                <td>@item.PrimaryKeyId</td>
+                <td>@item["CardOwnerName"]</td>
+                <td>@item["Email"]</td>
+                <td>@item["ContactRefId"]</td>
+                <td>@item["Balance"]</td>
+                <td>@item["CardTypeEnum"]</td>
+                <td>
+                    @Html.ActionLink("Edit", "EditCard", new { CardId = item.PrimaryKeyId })
+                    | @Html.ActionLink("Delete", "DeleteCard", new { CardId = item.PrimaryKeyId })
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+    <div>
+        @Html.ActionLink("Add New", "NewCard")
+    </div>
+    if(Model.SelectedCard != null)
+    {
+        <h4>Card Details</h4>
+        using(Html.BeginForm("SubmitCard", "BisFound"))
+        {
+        <div class="container">
+            <div class="form-row">
+                <div class="form-group col-2">
+                    <label>Card Id</label>
+                    @Html.EditorFor(m => m.SelectedCard.CardId,
+                   new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-2">
+                    <label>Select a Contact</label>
+                    @Html.DropDownListFor(m => m.SelectedCard.ContactId,
+                    new SelectList(Model.ContactList, "PrimaryKeyId", "FullName"),
+                    new { @class = "form-control" })
+                </div>
+                <div class="form-group col-2">
+                    <label>Select a Card Type</label>
+                    @Html.DropDownListFor(m => m.SelectedCard.CardType,
+                    new SelectList(Model.CardTypeList, "Handle", "Name"),
+                    new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-2">
+                    <label>Card Owner Name</label>
+                    @Html.EditorFor(m => m.SelectedCard.CardOwnerName,
+                        new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                <div class="form-group col-2">
+                    <label>Email</label>
+                    @Html.EditorFor(m => m.SelectedCard.Email,
+                        new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-2">
+                    <label>Title</label>
+                    @Html.EditorFor(m => m.SelectedCard.TitleField,
+                        new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                <div class="form-group col-2">
+                    <label>Balance</label>
+                    @Html.EditorFor(m => m.SelectedCard.Balance,
+                       new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    @Html.Hidden("isNew", Model.IsNew)
+                    <input type="submit" value="Submit" class="btn btn-primary" />
+                    @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-primary" })
+                </div>
+            </div>
+        </div>
+        }
+    }
+}

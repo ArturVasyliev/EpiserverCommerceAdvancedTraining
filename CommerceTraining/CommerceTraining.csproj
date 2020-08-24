@@ -409,6 +409,7 @@
     <Compile Include="Controllers\AccessoryNodeController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AdminPageController.cs" />
+    <Compile Include="Controllers\BisFoundController.cs" />
     <Compile Include="Controllers\BlouseProductController.cs" />
     <Compile Include="Controllers\CampaignPartialController.cs" />
     <Compile Include="Controllers\CartController.cs" />
@@ -418,7 +419,6 @@
     <Compile Include="Controllers\FindUnifiedController.cs" />
     <Compile Include="Controllers\CatalogControllerBase.cs" />
     <Compile Include="Controllers\InventoryDemoController.cs" />
-    <Compile Include="Controllers\MarketController.cs" />
     <Compile Include="Controllers\MarketsDemoController.cs" />
     <Compile Include="Controllers\NodeController.cs" />
     <Compile Include="Controllers\NodeListingBlockController.cs" />
@@ -506,6 +506,7 @@
     <Compile Include="Models\Promotions\SkuInNodePromo.cs" />
     <Compile Include="Models\ViewModels\AccountViewModel.cs" />
     <Compile Include="Models\ViewModels\AdminPageViewModel.cs" />
+    <Compile Include="Models\ViewModels\BisFoundViewModel.cs" />
     <Compile Include="Models\ViewModels\BlouseProductViewModel.cs" />
     <Compile Include="Models\ViewModels\CartViewModel.cs" />
     <Compile Include="Models\ViewModels\CatalogViewModel.cs" />
@@ -680,6 +681,7 @@
     <Content Include="Views\SearchDemo\ProviderModelQuery.cshtml" />
     <Content Include="Views\MarketsDemo\Index.cshtml" />
     <Content Include="Views\InventoryDemo\Index.cshtml" />
+    <Content Include="Views\BisFound\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
