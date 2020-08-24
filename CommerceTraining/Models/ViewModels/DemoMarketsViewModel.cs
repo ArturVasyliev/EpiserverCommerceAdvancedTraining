@@ -1,5 +1,6 @@
 ﻿using CommerceTraining.Models.Catalog;
 using Mediachase.Commerce;
+using Mediachase.Commerce.Orders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,8 @@ namespace CommerceTraining.Models.ViewModels
         public IEnumerable<IMarket> MarketList { get; set; }
         public ShirtVariation Shirt { get; set; }
 
+        public Money? TaxAmount { get; set; }
+        public Money? TaxAmountOldSchool { get; set; }
+        public IEnumerable<TaxValue> Taxes { get; set; }
     }
 }

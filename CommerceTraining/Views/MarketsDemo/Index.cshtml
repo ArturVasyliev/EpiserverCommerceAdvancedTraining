@@ -12,7 +12,7 @@
     @Html.DropDownListFor(m => m.SelectedMarket,
     new SelectList(Model.MarketList, "MarketId", "MarketName"),
     "-Please select a Market-",
-    new { @onchange = "this.form.submit();"})
+    new { @onchange = "this.form.submit();" })
 }
 
 <h4>Current Market Selected: @Model.SelectedMarket.MarketName</h4>
@@ -20,3 +20,16 @@
 @Html.PropertyFor(m => m.Shirt.Name)
 Price based on current market: @Model.Shirt.GetDefaultPrice().UnitPrice.ToString()
 
+<h4>List of Taxes Applied</h4>
+<ul>
+    @foreach (var tax in Model.Taxes)
+    {
+        <li>@tax.Name - @tax.Percentage%</li>
+    }
+</ul>
+<p>
+    Tax amount from old school method: @(Model.TaxAmountOldSchool != null ? Model.TaxAmountOldSchool.ToString() : "N/A")
+</p>
+<p>
+    Tax amount from ITaxCalculator: @(Model.TaxAmount != null ? Model.TaxAmount.ToString() : "N/A")
+</p>

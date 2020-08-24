@@ -437,10 +437,12 @@
     <Compile Include="Infrastructure\CartAndCheckout\CartAndCheckoutService.cs" />
     <Compile Include="Infrastructure\CartAndCheckout\CustomLineItemCalculator.cs" />
     <Compile Include="Infrastructure\CartAndCheckout\CustomTaxCalculator.cs" />
+    <Compile Include="Infrastructure\CartAndCheckout\DemoCustomTaxCalc.cs" />
     <Compile Include="Infrastructure\CartAndCheckout\OLDCustomTaxCalculator.cs" />
     <Compile Include="Infrastructure\CartAndCheckout\NewOrderEvents.cs" />
     <Compile Include="Infrastructure\DemoCurrentMarket.cs" />
     <Compile Include="Infrastructure\DemoCurrentMarketRegistration.cs" />
+    <Compile Include="Infrastructure\DemoCustomCalcConfigModule.cs" />
     <Compile Include="Infrastructure\EPiServerCommerceInitializationModule.cs" />
     <Compile Include="Infrastructure\EventReciever.cs" />
     <Compile Include="Infrastructure\EventsDemoInitializationModule.cs" />
