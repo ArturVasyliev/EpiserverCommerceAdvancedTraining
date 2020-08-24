@@ -27,7 +27,10 @@ namespace CommerceTraining.Infrastructure.CartAndCheckout
     {
         protected EntityObject TheGiftCard { get; set; }
         public string FrontEndMessage { get; set; }
-        
+        //IContentLoader _contentLoader { get; set; }
+        //public IContentLoader _contentLoader;
+
+        //Injected<IContentLoader> contentLoader;
         Injected<IOrderGroupFactory> _orderGroupFactory;
         Injected<IOrderRepository> _orderRepository;
         Injected<ICurrentMarket> _currentMarket;
@@ -44,6 +47,80 @@ namespace CommerceTraining.Infrastructure.CartAndCheckout
 
 
         #region Checking on "CleanUpCart"
+        // Old, but it lingers here
+        public void CleanUpCart(CartHelper ch)
+        {
+            // clean-up in the Cart and do validation
+            foreach (var item in ch.Cart.OrderAddresses)
+            {
+                ch.Cart.OrderAddresses.Remove(item);
+            }
+
+            foreach (OrderForm item in ch.Cart.OrderForms)
+            {
+                foreach (Shipment item2 in item.Shipments)
+                {
+                    item.Shipments.Remove(item2);
+                }
+            }
+
+            foreach (OrderForm item in ch.Cart.OrderForms)
+            {
+                foreach (Payment item2 in item.Payments)
+                {
+                    item.Payments.Remove(item2);
+                }
+            }
+
+            foreach (LineItem item in ch.LineItems)
+            {
+                // do something with LineItemIndex... will be removed soon
+            }
+
+        }
+
+        // New, not used yet
+        public void CleanUpCart(ICart cart)
+        {
+            /* test this by an intended crash in the checkout with Trousers & Suspenders */
+            // ...just playing around some... :)
+
+            // Missing a few things in this area ... filed a "feature request"
+            // clean-up in the Cart and do validation
+            // have only one form, still... trying to code here for several forms
+
+            // Custom, marks the cart... so it does not crach on null in CartController 
+            //IsSecondShipmentReqired(cart);
+            CheckOnLineItems(cart); // ...think ithas to be here ... check thats
+
+            // First Shipment is special, if it's zeros no method is set yet
+            // if it's zeros, let it be... but clear payments and keep the LineItems
+            IShipment firstShip = cart.GetFirstForm().Shipments.First();
+
+            if (firstShip.ShippingMethodId == new Guid() & firstShip.ShippingAddress == null)
+            {
+                // not set yet
+            }
+            else
+            {
+                // ... good enough?
+                firstShip.ShippingAddress = null; // Remove like this...?
+                firstShip.ShippingMethodId = new Guid(); // "Reset" the guid...?
+                _orderRepository.Service.Save(cart);
+            }
+
+            //firstShip.ShippingMethodName = "";
+            // name cannot be assigned...
+
+            // we may have (other than the default) that should go away
+            if (cart.GetFirstForm().Shipments.Count >= 2)
+            {
+                TidyUpShipments(cart);
+            }
+
+            // clear payments anyway
+            CleanOutPayments(cart);
+        }
 
         #endregion
 
@@ -76,7 +153,27 @@ namespace CommerceTraining.Infrastructure.CartAndCheckout
             }
         }
 
-        
+        public void TidyUpShipments(ICart cart)
+        {
+            // only first form now, change this... like for Payments
+            Dictionary<int, IShipment> _shippingDict = new Dictionary<int, IShipment>();
+
+            foreach (var item in cart.GetFirstForm().Shipments)//ch.Cart.OrderAddresses)
+            {
+                // auto-added shipment should remain in the cart
+                if (item.ShippingMethodId != new Guid()) // ...pick those "other shipments", reset done above
+                {
+                    // cannot remove in here, adding to Dict for later remove
+                    _shippingDict.Add(item.ShipmentId, item);
+                }
+            }
+
+            foreach (var item in _shippingDict.Values)
+            {
+                cart.GetFirstForm().Shipments.Remove(item);
+            }
+        }
+
         public bool CheckOnLineItem(DefaultVariation variation, ILineItem li)
         {
             // need to set it to something for the serialized carts, so the property becomes created
@@ -117,14 +214,15 @@ namespace CommerceTraining.Infrastructure.CartAndCheckout
         public Guid CheckApplicableShippingsNew(string code)
         {
             #region New
-            
+            // quick-fix
+            //code = "Suspenders";
+
             Guid theShippingMethodGuid = new Guid();
 
-            // just playing around
             // Not any good API for getting ShippingOptionParameters direct
 
             List<FilterElement> filters = new List<FilterElement>();
-            filters.Add(new FilterElement("Value", FilterElementType.Equal, code)); // the Code
+            filters.Add(new FilterElement("Value", FilterElementType.Equal, code));
 
             Guid theGuid = new Guid();
             using (IDataReader reader = Mediachase.BusinessFoundation.Data.DataHelper
@@ -185,9 +283,37 @@ namespace CommerceTraining.Infrastructure.CartAndCheckout
             */
             #endregion
 
-            //return theShippingMethodGuid;
+            return theShippingMethodGuid;
         }
 
+        #region EvenOlder
+
+        // older...
+        //public bool IsSecondShipmentReqired(ICart cart)
+        //{
+        //    // this is checked both in VariationController & the CartController
+        //    bool theBool = false;
+        //    var lineItems = cart.GetAllLineItems();
+
+        //    foreach (ILineItem item in lineItems)
+        //    {
+        //        if ((bool)item.Properties["RequireSpecialShipping"] == true)
+        //        {
+        //            cart.Properties["SpecialShip"] = true; // in ECF 11
+        //            theBool = true;
+        //            break;
+        //        }
+        //        else
+        //        {
+        //            cart.Properties["SpecialShip"] = false;
+        //            theBool = false;
+        //        }
+        //    }
+
+        //    return theBool;
+        //}
+
+        #endregion
 
         // ...for now we do it in the TrousersController (RoCe: re-write when time permits)
         // not in use yet
@@ -210,6 +336,10 @@ namespace CommerceTraining.Infrastructure.CartAndCheckout
             {
                 IOrderAddress secondAddress = cart.GetFirstForm().Shipments.First().ShippingAddress;
             }
+
+            //IShipment newShipment = _orderFactory.Service.CreateShipment();
+            //newShipment.LineItems.Add(lineItem);
+
 
             // get the whole dto so we can try to find the ShippingOptionParameters set
             ShippingMethodDto dto = ShippingManager.GetShippingMethodsByMarket(
@@ -266,6 +396,7 @@ namespace CommerceTraining.Infrastructure.CartAndCheckout
             this.TheGiftCard = GetTheGiftCard();
 
             oldPayment.Amount = oldPayment.Amount - decimal.Parse(this.TheGiftCard["Balance"].ToString());
+            //decimal d = (decimal)this.theGiftCard["Balance"];
 
             // Add "GiftCard" payment to the Cart
             giftCardPayment = new OtherPayment
@@ -352,24 +483,24 @@ namespace CommerceTraining.Infrastructure.CartAndCheckout
         {
             // RoCe: tot comes in subtracted, don't need to do it in here
             // only one club-card per buyer in this store
-            PrimaryKeyId pk = (PrimaryKeyId)CustomerContext.Current.CurrentContactId;
+            //PrimaryKeyId pk = (PrimaryKeyId)CustomerContext.Current.CurrentContactId;
 
-            EntityObject[] theCards = BusinessManager.List
-                ("ClubCard", new[] { FilterElement.EqualElement("ReferenceFieldNameId", pk) });
+            //EntityObject[] theCards = BusinessManager.List
+            //    ("ClubCard", new[] { FilterElement.EqualElement("ReferenceFieldNameId", pk) });
 
-            if (theCards.Count() != 0) // ...is there one or more card(s))
-            {
-                // grab the first one as demo
-                int balance = (int)theCards[0]["Balance"]; // Collected purchase-points
+            //if (theCards.Count() != 0) // ...is there one or more card(s))
+            //{
+            //    // grab the first one as demo
+            //    int balance = (int)theCards[0]["Balance"]; // Collected purchase-points
 
-                // Get cardtype for current cust for calc of points (Gold, Silver or Bronze)
-                int value = (int)theCards[0]["CardTypeEnum"]; // gets the int
+            //    // Get cardtype for current cust for calc of points (Gold, Silver or Bronze)
+            //    int value = (int)theCards[0]["CardTypeEnum"]; // gets the int
 
-                // probably some store policy involved... instead of the silly example below
-                int newBalance = balance + (int)Math.Round(totalSpent / value); // this is a demo :)
-                theCards[0]["Balance"] = newBalance;
-                BusinessManager.Update(theCards[0]);
-            }
+            //    // probably some store policy involved... instead of the silly example below
+            //    int newBalance = balance + (int)Math.Round(totalSpent / value); // this is a demo :)
+            //    theCards[0]["Balance"] = newBalance;
+            //    BusinessManager.Update(theCards[0]);
+            //}
         }
 
         #endregion

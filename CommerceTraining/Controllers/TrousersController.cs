@@ -32,11 +32,12 @@ namespace CommerceTraining.Controllers
 {
     public class TrousersController : CatalogControllerBase<TrousersVariation>
     {
+        // ToDo: Improve the IsOnLine - stuff
         private static bool IsOnLine { get; set; } // QuickFix
 
         private readonly IPriceService _priceService;
         private readonly IPriceDetailService _priceDetailService;
-        //public static IContentLoader xyz;
+        public static IContentLoader xyz;
 
         public TrousersController(
             IContentLoader contentLoader
@@ -60,22 +61,25 @@ namespace CommerceTraining.Controllers
 
             var model = new TrousersViewModel
             {
-                MainBody = currentContent.MainBody, 
+                MainBody = currentContent.MainBody, // boom if empty...
                 priceString = currentContent.GetDefaultPrice().UnitPrice.Amount.ToString("C"),
+                discountPrice = StoreHelper.GetDiscountPrice(currentContent.LoadEntry()),
                 image = GetDefaultAsset(currentContent),
                 CanBeMonogrammed = false,
-                
+                //ProductArea = currentContent.ProductArea,
+                //CartUrl = cartUrl, // new style
+                //WishlistUrl = wUrl, // new style
+
+                // For Adv.
                 // warehouse info
                 generalWarehouseInfo = this.generalWarehouseInfo,
                 specificWarehouseInfo = this.specificWarehouseInfo,
                 entryCode = currentContent.Code,
 
                 // Associations
-                Associations = GetAssociatedEntries(currentContent), 
-                AssociationMetaData = GetAssociationMetaData(currentContent),
-                
-                // Dictionary<string, ContentReference> // The final thing
-                AssocAggregated = GetAggregatedAssocciations(currentContent), 
+                Associations = GetAssociatedEntries(currentContent), // IEnumerable<ContentReference> // Remove when Aggregation is done
+                AssociationMetaData = GetAssociationMetaData(currentContent), // string // Remove when Aggregation is done
+                AssocAggregated = GetAggregatedAssocciations(currentContent), // Dictionary<string, ContentReference> // The final thing
 
                 // Searchendizing ... need to be OnLine to use
                 BoughtThisBoughtThat = GetOtherEntries(currentContent.Code)
@@ -160,6 +164,9 @@ namespace CommerceTraining.Controllers
             // We now get a hit on the "special shipment" requirement
             if (ccService.CheckOnLineItem(accessory, lineItem2)) // Sets the "RequireSpecialShipping" (bool) to true)
             {
+                //ccService.AddAnotherShipment(cart, lineItem2, false); // RoCe: fix this one, use later
+                // ...adding manually here below
+
                 IShipment newShipment = _orderGroupFactory.Service.CreateShipment(cart);
                 cart.AddShipment(newShipment);
 
@@ -172,7 +179,7 @@ namespace CommerceTraining.Controllers
                 newAddress.City = "Kalmar";
                 newAddress.CountryCode = "sv";
                 newAddress.CountryName = "Sweden";
-                newAddress.Id = "NewShipAddress"; // needs to be here
+                newAddress.Id = "NewShipAddress"; // need to be here
 
                 newShipment.ShippingAddress = newAddress;
                 newShipment.LineItems.Add(lineItem2);
@@ -182,14 +189,20 @@ namespace CommerceTraining.Controllers
                 var g = ShippingManager.GetShippingMethodsByMarket(MarketId.Default.Value, false)
                     .ShippingMethodParameter.Where(s => s.Value == lineItem2.Code);
 
-                // By default we get "Awaiting Inventory" and cannot release the shipment (in Com-Man)
-                // not enough code for this in here...
+                // not so easy as "Methods"... have to use the "undocumented BF-stuff"
+                //ShippingManager.GetShippingOption(new Guid(g.ToString())).ShippingOptionParameter.Where(p=>p.)
+
+                // by default we get "Awaiting Inventory" and cannot release the shipment (in Com-Man)
+                // not enough code in this part of the demo... for this
                 newShipment.OrderShipmentStatus = OrderShipmentStatus.InventoryAssigned;
 
                 // with the below it gets released ... and we can only cancel it 
                 // the below is not sufficient, will/should be done elsewhere
                 _inventoryProcessor.Service.AdjustInventoryOrRemoveLineItem(cart.GetFirstShipment()
                      , OrderStatus.Completed, (item, issue) => { }); // can have a look in "Fund"
+
+                // just a check
+                //var lis = cart.GetAllLineItems();
 
                 /* Save ... */
                 _orderRepository.Service.Save(cart);
@@ -212,6 +225,150 @@ namespace CommerceTraining.Controllers
 
         List<string> generalWarehouseInfo = new List<string>();
         List<string> specificWarehouseInfo = new List<string>();
+
+        // check what we have in stock
+        private void CheckWarehouses(ShirtVariation currentContent)
+        {
+            generalWarehouseInfo.Add("Entry inventory Tracked: " + currentContent.TrackInventory.ToString());
+
+            // other code in CommerceDemo\...\AdminPageTemplate
+
+            // how many FFCenters
+            IEnumerable<IWarehouse> fullfillmentCenters = warehouseRepository.Service.List()
+                .Where(w => (currentContent.ApplicationId == w.ApplicationId.ToString()) && w.IsActive && w.IsFulfillmentCenter);
+
+            if (fullfillmentCenters.Count() > 1)
+            {
+                generalWarehouseInfo.Add("More than one fullfillment centers, need custom logic");
+            }
+
+            // get all WHs for enumeration and output to the view
+            IEnumerable<IWarehouse> allWarehouses = warehouseRepository.Service.List();
+            Decimal requestedQuantity = 0M;
+
+            // ...there is also an InventoryLoader
+            foreach (var warehouse in allWarehouses)
+            {
+                //specificWarehouseInfo.Add(warehouse.Code);
+                InventoryRecord inventoryRecord = inventoryService.Service.Get(currentContent.Code, warehouse.Code);
+
+                // Nice extension
+                //var inventory = currentContent.GetStockPlacement();
+
+                if (inventoryRecord == null) // means that the SKU is not referenced from that WH
+                {
+                    specificWarehouseInfo.Add(String.Format("WH: {0} - Available Qty: {1} ", warehouse.Code, 0));
+                }
+                else
+                {
+                    specificWarehouseInfo.Add(String.Format(
+                        "WH: {0} - Available Qty: {1} - Req Qty: {2} "
+                        , warehouse.Code
+                        , inventoryRecord.PurchaseAvailableQuantity
+                        , inventoryRecord.PurchaseRequestedQuantity));
+
+                    // may need to look at Back & Pre - qty
+                    specificWarehouseInfo.Add(String.Format(
+                        "BackOrderAvailable Qty: {0} - BackOrder Req Qty: {1} "
+                         , inventoryRecord.BackorderAvailableQuantity
+                        , inventoryRecord.BackorderRequestedQuantity));
+
+                    requestedQuantity += inventoryRecord.PurchaseRequestedQuantity;
+                }
+            }
+            generalWarehouseInfo.Add(String.Format("Total req qty: {0}", requestedQuantity)); // it adds up across WHs
+        }
+
+        public ActionResult RequestInventory(string code) // step through this
+        {
+            string warehouseCode = "Stockholm"; // a bit hard-coded
+            //string warehouseCode = "Nashua"; // a bit hard-coded
+
+            InventoryRecord inventoryRecord = inventoryService.Service.Get(code, warehouseCode);
+            decimal available = inventoryRecord.PurchaseAvailableQuantity;
+            decimal requested = inventoryRecord.PurchaseRequestedQuantity;
+            decimal backOrderAvailable = inventoryRecord.BackorderAvailableQuantity;
+            decimal backOrderRequested = inventoryRecord.BackorderRequestedQuantity;
+
+            List<InventoryRequestItem> requestItems = new List<InventoryRequestItem>(); // holds the "items"
+            InventoryRequestItem requestItem = new InventoryRequestItem();
+            requestItem.CatalogEntryCode = code;
+            requestItem.Quantity = 3M;
+            // ...no time-out --> custom
+
+            // calls for some logic
+            requestItem.WarehouseCode = warehouseCode;
+            requestItem.RequestType = InventoryRequestType.Purchase; // reserve for now
+
+            // pseudo-code below
+            //requestItem.OperationKey = requestItem.WarehouseCode + requestItem.CatalogEntryCode + requestItem.Quantity.ToString();
+
+            requestItems.Add(requestItem);
+
+            InventoryRequest inventoryRequest = new InventoryRequest(DateTime.UtcNow, requestItems, null);
+            InventoryResponse inventoryResponse = inventoryService.Service.Request(inventoryRequest);
+
+            if (inventoryResponse.IsSuccess)
+            {
+                TempData["key"] = inventoryResponse.Items[0].OperationKey; // bad place, just for demo
+                // Storage in [dbo].[Shipment]  or "custom"
+                // [OperationKeys] NVARCHAR (MAX)   NULL,
+            }
+            else
+            {
+                // could start to adjust Pre/Back-Order-qty
+                InventoryRequestItem backOrderRequestItem = new InventoryRequestItem();
+                backOrderRequestItem.CatalogEntryCode = code;
+                backOrderRequestItem.Quantity = 3M;
+                backOrderRequestItem.WarehouseCode = warehouseCode;
+                backOrderRequestItem.RequestType = InventoryRequestType.Backorder; // ...if enabled
+                backOrderRequestItem.OperationKey = backOrderRequestItem.RequestType + backOrderRequestItem.WarehouseCode + backOrderRequestItem.CatalogEntryCode + backOrderRequestItem.Quantity.ToString();
+
+                List<InventoryRequestItem> backOrderRequestItems = new List<InventoryRequestItem>(); // holds the "items"    
+                backOrderRequestItems.Add(backOrderRequestItem);
+
+                InventoryRequest backOrderRequest = new InventoryRequest(DateTime.UtcNow, backOrderRequestItems, null);
+
+                InventoryResponse backOrderInventoryResponse =
+                    inventoryService.Service.Request(backOrderRequest); // 
+
+            }
+
+            // ...gets 
+            //dbo.InventoryService - table gets the requests and accumulate
+
+            //inventoryService.Service.Request(requestItem);
+            // request it... 
+            // and it increases in reserved until you can´t reserve more --> "!Success"
+            // ...and decreases available
+
+            return RedirectToAction("Index", "Variation");
+        }
+
+        public ActionResult CancelRequest(string code)
+        {
+            // use the "key" ... "WH-location", entry & Qty are irrelevant as the "key" governs what has happend
+            // all are overlooked even if entered
+
+            List<InventoryRequestItem> requestItems = new List<InventoryRequestItem>(); // holds the "items"
+            InventoryRequestItem requestItem = new InventoryRequestItem();
+
+            // calls for some logic
+            requestItem.RequestType = InventoryRequestType.Cancel; // 
+            requestItem.OperationKey = TempData["key"] as string;
+
+            requestItems.Add(requestItem);
+
+            InventoryRequest inventoryRequest = new InventoryRequest(DateTime.UtcNow, requestItems, null);
+            InventoryResponse inventoryResponse = inventoryService.Service.Request(inventoryRequest);
+
+            return RedirectToAction("Index", "Variation");
+
+            // Check the "Complete-method" 
+            // ...no time-limited reservation (allthough it´s a custom implementation of "the provider")
+            // ......could do a work-around with a timer counting down... and then cancel in code
+
+        }
 
         public ActionResult SetInventory(VariationContent currentContent)
         {
@@ -341,19 +498,21 @@ namespace CommerceTraining.Controllers
             return strB.ToString();
         }
 
-        // ToDo: clean up here ... have an Aggregation for this part ... could use as demo
-        Injected<IAssociationRepository> _assocRep;
+        // ToDo: clean up here ... have an Aggergation for this part ... could use as demo
         private IEnumerable<ContentReference> GetAssociatedEntries(EntryContentBase currentContent)
         {
-            //IAssociationRepository _assocRep = ServiceLocator.Current.GetInstance<IAssociationRepository>();
+            // using linksRep is gone
+            IAssociationRepository _linksRep = ServiceLocator.Current.GetInstance<IAssociationRepository>();
 
-            IEnumerable<EPiServer.Commerce.Catalog.Linking.Association> assoc = 
-                currentContent.GetAssociations().Where(l => l.Group.Name == "CrossSell");
+            IEnumerable<EPiServer.Commerce.Catalog.Linking.Association> linksRepAssoc =
+                _linksRep.GetAssociations(currentContent.ContentLink).Where(l => l.Group.Name == "CrossSell");
+            // would like to be able to filter when calling, instead of .Where()
 
-            // just checking
-            var a = assoc.First().Group;
+            // would like to get the metadata out ... like type and group... and probaly treat them differently
+            IEnumerable<EPiServer.Commerce.Catalog.Linking.Association> assoc = currentContent.GetAssociations();
 
             List<ContentReference> refs = new List<ContentReference>();
+
             foreach (EPiServer.Commerce.Catalog.Linking.Association item in assoc)
             {
                 refs.Add(item.Target);

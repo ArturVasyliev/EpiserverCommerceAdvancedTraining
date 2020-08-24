@@ -12,15 +12,17 @@ using System.Linq;
 using System.Web;
 
 using EPiServer.Find.Cms; // ...for .GetContentResult(); 
+//EPiServer.Find.Commerce.CatalogContentBaseExtensions;
+//EPiServer.Find.Commerce.ProductContentExtensions;
 using EPiServer.Find.Commerce; // extensions are here
 using Mediachase.Commerce;
 using EPiServer.Commerce.SpecializedProperties;
+using EPiServer.Find.Cms;
 using EPiServer.Commerce.Order;
 
 
 namespace CommerceTraining.SupportingClasses
 {
-
     public class FindQueries
     {
 
@@ -32,7 +34,7 @@ namespace CommerceTraining.SupportingClasses
         public List<ShirtProduct> productList = new List<ShirtProduct>();
 
         // no demo, just checking
-        public void temp()
+        public void TempNoDemo()
         {
             //  _client.Conventions.IdConvention
             //.ForInstancesOf<OrderValues>()
@@ -50,14 +52,32 @@ namespace CommerceTraining.SupportingClasses
 
         }
 
-        #region .ctor(s) taking the client
-
-        public FindQueries()
+        private void TestSomeStuff(VariationContent variationContent)
         {
-            _client = Client.CreateFromConfig();
+            SearchClient.Instance.Search<IContent>() // 
+                .GetContentResult();//.GetContentResult();
+
+
+            SearchClient.Instance.Search<PageData>() // 
+            .GetPagesResult(); // ...?
+
+
+            // SearchClient.Instance.Search<ImageData>() // integrated
+            //     .GetFilesResult(); //...?
+
+            //SearchRequestExtensions.
+
         }
 
-        // Different kind if "Client"
+
+        #region .ctor(s) taking the client
+
+        //public FindQueries()
+        //{
+        //    _client = Client.CreateFromConfig();
+        //}
+
+        // Different kind of "Client"(s)
         public FindQueries(IClient client) // integrated
         {
             _client = client;
@@ -70,28 +90,6 @@ namespace CommerceTraining.SupportingClasses
 
         #endregion
 
-        #region Native mode
-
-        // Demo
-        public void GetNative(string keyWords)
-        {
-            // not integrated, may need projection
-            var result = _client.Search<FashionNode>() // note: a node
-                .For(keyWords)
-                .Select(x => new // doing like this... for the Dictionary
-                {
-                    //MainBody = x.MainBody, // crash expected
-                    //MainBody = x.MainBody.AsCropped(200), // still error, no deserializer
-                    Name = x.Name,
-                    Code = x.Code,
-                    //Contentlink = x.ContentLink // ...also error for this one 
-                }
-                   )
-                   .GetResult();
-        }
-
-        #endregion
-
         #region Integrated mode
 
         // Demo - need a clean-up
@@ -99,29 +97,26 @@ namespace CommerceTraining.SupportingClasses
         {
             Dictionary<string, string> strings = new Dictionary<string, string>();
 
-            //langList.Add("en"); // old
             //langList.Add(ContentLanguage.PreferredCulture.Name); // not used
             //Language lang = new Language(ContentLanguage.PreferredCulture.Name, null, null); // not used
 
-            var result = SearchClient.Instance.Search<ShirtVariation>() // Check if this applies
+            var result = _client.Search<ShirtVariation>() // Check if this applies
               .For(keyWords)
-              //.Filter(x=> x.Margin.GreaterThan(20)) 
+              //.Filter(x=> x.Margin.GreaterThan(20)) //  Custom field
               .Filter(x => x.Margin.InRange(20, 40)) // ... at the Variation only // Margin added to model for Adv.
               .TermsFacetFor(x => x.Brand)
               .TermsFacetFor(x => x.Size)
-              .GetContentResult(); // SDK states this... SDK needs an update, stuff (params) has changed
+              .GetContentResult(); // SDK states this... params has changed
 
             // ...gone
             //.FilterOnLanguages(langList) // 
-            //.GetContentResult(); // in 8... GetContentResult(new LanguageSelector("en"));
-
-            this.variantList = result.OfType<ShirtVariation>().ToList(); // ...seems like "new style"
+            // "new style"
+            // this.variantList = result.OfType<ShirtVariation>().ToList(); 
 
             var hits = result.SearchResult.Hits; //... 
             //var hits = result.Hits; // old/native
 
             strings.Add(result.SearchResult.Hits.Count().ToString(), " hits");
-            //strings.Add(result.Hits.Count().ToString(), " hits");// ...seems like new style
 
             // could do like this and then the "loader" if duplicated index entries (will be remedied)
             // else .Exist() or ExistKey() ... or below
@@ -134,7 +129,7 @@ namespace CommerceTraining.SupportingClasses
 
             foreach (var item in result.TermsFacetFor(x => x.Brand))
             {
-                strings.Add("Brand: " + item.Term, item.Count.ToString()); // EPiServer.Find.Api.Facets.TermCoun
+                strings.Add("Brand: " + item.Term, item.Count.ToString()); // EPiServer.Find.Api.Facets.TermCount
             }
 
             foreach (var item in result.TermsFacetFor(x => x.Size))
@@ -143,6 +138,27 @@ namespace CommerceTraining.SupportingClasses
             }
 
             return strings;
+        }
+
+        #endregion
+
+        #region Native mode
+
+        public void GetNative(string keyWords)
+        {
+            // not integrated, need "projection"
+            var result = _client.Search<FashionNode>(Language.Swedish) // ... a node - only Swedish
+                .For(keyWords)
+                .InField(x => x.MainBody) // not using the "All" field... when doing like this
+                .Select(x => new 
+                {
+                    // .MainBody, // crash expected, no deserializer
+                    // x.ContentLink // ...error too
+                    x.Name,
+                    x.Code,
+                }
+                )
+                .GetResult();
         }
 
         #endregion
@@ -198,6 +214,7 @@ namespace CommerceTraining.SupportingClasses
         {
             // ...just a test with several addesses, as we in the checkout only have one address
             List<AddressValues> locallist = addressValues.ToList();
+
             AddressValues v = new AddressValues
             {
                 CityName = "Motala",
@@ -216,7 +233,7 @@ namespace CommerceTraining.SupportingClasses
                 item.ID = item.ID.Replace(" ", "-"); // do not like whitespace
             }
 
-            if (addressValues == null) // if it of some reason is
+            if (addressValues == null) // if it of some reason should be
             {
                 try
                 {
@@ -254,7 +271,9 @@ namespace CommerceTraining.SupportingClasses
             { custName = "Anonymous"; }
             else { custName = order.CustomerName; }
 
-            Dictionary<string, decimal> itemDict = new Dictionary<string, decimal>(); // target for LineItems & Qty
+            // target for LineItems & Qty
+            Dictionary<string, decimal> itemDict = new Dictionary<string, decimal>();
+
             foreach (LineItem item in order.OrderForms[0].LineItems)
             {
                 itemDict.Add(item.Code, item.Quantity);
@@ -384,14 +403,16 @@ namespace CommerceTraining.SupportingClasses
 
         #endregion
 
-        #region New Stuff for ECF-Find in 9.2 - 9.3 - Demo some
+        #region Stuff for ECF+Find - Demo some
+
+        #region NoDemo
 
         public void NewFindMethods(VariationContent variationContent)
         {
             #region FindStuff - need to check this
 
 
-            var p = GetProductsForVariation(variationContent); // okay
+            var p = GetProductsForVariation(variationContent.ContentLink); // okay
             // ?? var v1 = GetAssociations("Accessories",variationContent.Code); // fick inget 
 
             // new style, custom Find-q
@@ -417,62 +438,49 @@ namespace CommerceTraining.SupportingClasses
             //TestSomeStuff(variationContent);
         }
 
-        private void TestSomeStuff(VariationContent variationContent)
-        {
-            SearchClient.Instance.Search<IContent>() // 
-                .GetContentResult();//.GetContentResult();
-
-
-            SearchClient.Instance.Search<PageData>() // 
-            .GetPagesResult(); // ...?
-
-
-            // SearchClient.Instance.Search<ImageData>() // integrated
-            //     .GetFilesResult(); //...?
-
-            //SearchRequestExtensions.
-
-        }
-
-        public void NewExtensionMethods(ProductContent productContent)
-        {
-            //var r = GetEntriesByMarket(MarketId.Default); // okay
-            //var v = GetVariationsForProduct(productContent); // error
-        }
-
-        public void NewExtensionMethods(NodeContent nodeContent)
-        {
-            //var r = GetEntriesByMarket(MarketId.Default); // okay
-            //var v = GetParentNodes(nodeContent); // okay
-            //var n = GetChildNodes(nodeContent); // okay
-
-        }
-
-        // not checked...
+        // not checked... fishy
         private object GetAncestors(VariationContent variationContent)
         {
             return SearchClient.Instance.Search<ShirtVariation>()
-                //.Filter(x=>x.)
+                //.For(x=>x.Ancestors)
+                //.Filter(An)
                 .GetContentResult();
         }
 
-        private IEnumerable<ProductContent> GetProductsForVariation(VariationContent variation) // ok
+        // not checked
+        private IEnumerable<dynamic> GetContentReferencesWithImageUrls()
         {
-            //return _client.Search<ProductContent>() // native
-            return SearchClient.Instance.Search<ShirtProduct>() // integrated
-                                                                //.Filter(x=> x.)
-                .Filter(x => x.Variations().MatchContained(y => y.ID, variation.ContentLink.ID))
-                //.Filter(x=>x.)
+            return _client.Search<EntryContentBase>()
+                .Select(x => new
+                {
+                    x.ContentLink,
+                    ImageUrl = x.DefaultImageUrl(),
+                    ThumbnailUrl = x.ThumbnailUrl()
+                })
+                .GetResult();
+        }
+
+        #endregion
+
+        #region Products - Variations
+
+        private IEnumerable<ProductContent> GetProductsForVariation(ContentReference variationContentRef) // ok
+        {
+            var result = SearchClient.Instance.Search<ShirtProduct>() // integrated
+                .Filter(x => x.Variations()
+                .MatchContained(y => y.ID, variationContentRef.ID))
                 .GetContentResult();
+
+            return null; // for now
         }
 
         // ??
-        private IEnumerable<ContentReference> GetVariationsForProduct(ProductContent productContent)
+        private IEnumerable<ContentReference> GetVariationsForProduct(ContentReference productContentRef)
         {
             var result = _client.Search<ProductContent>()
            //return _client.Search<ProductContent>()
            //return SearchClient.Instance.Search<ProductContent>()
-           .Filter(x => x.ContentLink.Match(productContent.ContentLink))
+           .Filter(x => x.ContentLink.Match(productContentRef))
            .Select(x => x.Variations())
                 //.GetContentResult();
                 .GetResult();
@@ -489,50 +497,85 @@ Path 'VariantsReference.___types', line 1, position 881*/
 
         }
 
-        private IEnumerable<NodeContent> GetChildNodes(NodeContent parentNode) // ok
+        public IEnumerable<EntryContentBase> GetEntriesByMarket(MarketId marketId) // ok
         {
-            //return _client.Search<NodeContent>()
-            return SearchClient.Instance.Search<NodeContent>()
-                .Filter(x => x.ParentNodeRelations().MatchContained(c => c.ID, parentNode.ContentLink.ID))
+            var result = _client.Search<EntryContentBase>()
+                .Filter(c => c.Markets().MatchContained(x => x.Value, marketId.Value))
                 .GetContentResult();
+
+            return null; // for now
         }
 
-        private IEnumerable<NodeContent> GetParentNodes(NodeContent childNode) // ok
+        #endregion
+
+        #region Nodes
+
+        private IEnumerable<NodeContent> GetChildNodes(ContentReference parentNodeRef) // ok
         {
             //return _client.Search<NodeContent>()
-            return SearchClient.Instance.Search<NodeContent>()
-                .Filter(x => x.ChildNodeRelations().MatchContained(c => c.ID, childNode.ContentLink.ID))
+            var result = SearchClient.Instance.Search<NodeContent>()
+                .Filter(x => x.ParentNodeRelations().MatchContained(
+                    c => c.ID, parentNodeRef.ID))
                 .GetContentResult();
+
+            return null; // for now
         }
+
+        private IEnumerable<NodeContent> GetParentNodes(ContentReference childNodeRef) // ok
+        {
+            //return _client.Search<NodeContent>()
+            var result = SearchClient.Instance.Search<NodeContent>()
+                .Filter(x => x.ChildNodeRelations().MatchContained(
+                    c => c.ID, childNodeRef.ID))
+                .GetContentResult();
+
+            return null; // for now
+        }
+
+        #endregion
+
+        #region Package-Bundle
 
         // not tested
-        private IEnumerable<EntryContentBase> GetBundleEntries(BundleContent bundleContent)
+        private IEnumerable<EntryContentBase> GetBundleEntries(ContentReference bundleContentRef)
         {
-            return _client.Search<EntryContentBase>()
-                .Filter(c => c.ParentBundles().MatchContained(b => b.ID, bundleContent.ContentLink.ID))
+            var result = _client.Search<EntryContentBase>()
+                .Filter(c => c.ParentBundles().MatchContained(b => b.ID, bundleContentRef.ID))
                 .GetContentResult();
+
+            return null; // for now
         }
 
-        private IEnumerable<BundleContent> GetBundlesForEntry(EntryContentBase entryContentBase)
+        private IEnumerable<BundleContent> GetBundlesForEntry(ContentReference bundleContentRef)
         {
-            return _client.Search<BundleContent>()
-                .Filter(c => c.BundleEntries().MatchContained(b => b.ID, entryContentBase.ContentLink.ID))
+            var result = _client.Search<BundleContent>()
+                .Filter(c => c.BundleEntries().MatchContained(b => b.ID, bundleContentRef.ID))
                 .GetContentResult();
+
+            return null; // for now
         }
 
-        private IEnumerable<EntryContentBase> GetPackageEntries(PackageContent packageContent)
+        private IEnumerable<EntryContentBase> GetPackageEntries(ContentReference packageContentRef)
         {
-            return _client.Search<EntryContentBase>()
-                .Filter(c => c.ParentPackages().MatchContained(b => b.ID, packageContent.ContentLink.ID))
+            var result = _client.Search<EntryContentBase>()
+                .Filter(c => c.ParentPackages().MatchContained(
+                    b => b.ID, packageContentRef.ID))
                 .GetContentResult();
+
+            return null; // for now
         }
 
-        private IEnumerable<PackageContent> GetPackagesForEntry(EntryContentBase entryContentBase)
+        private IEnumerable<PackageContent> GetPackagesForEntry(ContentReference entryRef)
         {
-            return _client.Search<PackageContent>()
-                .Filter(c => c.PackageEntries().MatchContained(b => b.ID, entryContentBase.ContentLink.ID))
+            var result = _client.Search<PackageContent>()
+                .Filter(c => c.PackageEntries().MatchContained(b => b.ID, entryRef.ID))
                 .GetContentResult();
+
+            return null; // for now
         }
+
+
+        #endregion
 
         //private IDictionary<ContentReference, IEnumerable<ContentReference>> GetAssociations(string type) // no hits or json error
         private void GetAssociations(string type, string code)
@@ -562,12 +605,7 @@ Path 'VariantsReference.___types', line 1, position 881*/
 
         }
 
-        private IEnumerable<EntryContentBase> GetEntriesByMarket(MarketId marketId) // ok
-        {
-            return _client.Search<EntryContentBase>()
-                .Filter(c => c.Markets().MatchContained(x => x.Value, marketId.Value))
-                .GetContentResult();
-        }
+        #region HaveThisElseWhere
 
         // nope
         private IEnumerable<dynamic> GetVariationReferencesWithUnitPrice(MarketId marketId)
@@ -634,18 +672,40 @@ Path 'VariantsReference.___types', line 1, position 881*/
                 }
             }
         }
+        
+        #endregion
 
-        // not checked
-        private IEnumerable<dynamic> GetContentReferencesWithImageUrls()
+        public void VariationExamples(ContentReference variationRef)
         {
-            return _client.Search<EntryContentBase>()
-                .Select(x => new
-                {
-                    x.ContentLink,
-                    ImageUrl = x.DefaultImageUrl(),
-                    ThumbnailUrl = x.ThumbnailUrl()
-                })
-                .GetResult();
+           GetProductsForVariation(variationRef);
+
+        }
+
+        public void ProductExamples(ContentReference productRef)
+        {
+            GetVariationsForProduct(productRef);
+        }
+
+        public void NodeExamples(ContentReference nodeRef)
+        {
+            GetChildNodes(nodeRef);
+            GetParentNodes(nodeRef);
+        }
+
+        public void BundleExamples(ContentReference entryContentRef)
+        {
+            //GetPackageEntries(entryContentRef);
+            GetBundleEntries(entryContentRef);
+            //GetPackagesForEntry(entryContentRef);
+            GetBundlesForEntry(entryContentRef);
+        }
+
+        public void PackageExamples(ContentReference entryContentRef)
+        {
+            GetPackageEntries(entryContentRef);
+            //GetBundleEntries(entryContentRef);
+            GetPackagesForEntry(entryContentRef);
+            //GetBundlesForEntry(entryContentRef);
         }
 
 
@@ -657,12 +717,12 @@ Path 'VariantsReference.___types', line 1, position 881*/
         // Pricing & Inventory
         public void SDKExamples(ContentReference contentReference)
         {
-            // Pricing
+            // Pricing - Inventory
             Currency currency = new Currency("USD");
 
-            var result = SearchClient.Instance.Search<VariationContent>()
+            var result1 = SearchClient.Instance.Search<VariationContent>()
                 .Filter(x => x.DefaultPrice().UnitPrice.Currency.Match(currency))
-                .GetContentResult(); // Get.. is missing in SDK
+                .GetContentResult(); // 
 
             var result2 = SearchClient.Instance.Search<VariationContent>()
                  .Filter(x => x.DefaultPrice().UnitPrice.LessThan(new Money(200M, new Currency("USD"))))
@@ -676,17 +736,12 @@ Path 'VariantsReference.___types', line 1, position 881*/
                 .Filter(x => x.InStockQuantityLessThan(200))
                 .GetContentResult();
 
-            // ...MatchInventoryStatus is obsolete
-            //var result5 = SearchClient.Instance.Search<VariationContent>()
-            //    .Filter(x => x.MatchInventoryStatus(InventoryStatus.Enabled)) 
-            //    .GetContentResult();
-
             var result5 = SearchClient.Instance.Search<VariationContent>()
                 .Filter(x => x.MatchIsTracked(true))
                 .GetContentResult();
 
             var result6 = SearchClient.Instance.Search<VariationContent>()
-                .Filter(x => x.MatchWarehouseCode("Stockholm"))
+                .Filter(x => x.MatchWarehouseCode("Nashua"))
                 .GetContentResult();
         }
 
@@ -699,6 +754,25 @@ Path 'VariantsReference.___types', line 1, position 881*/
 
 
         #endregion
-    }
 
+        #region Extensionmethods
+
+        public void NewExtensionMethods(ProductContent productContent)
+        {
+            //var r = GetEntriesByMarket(MarketId.Default); // okay
+            //var v = GetVariationsForProduct(productContent); // error
+        }
+
+        public void NewExtensionMethods(NodeContent nodeContent)
+        {
+            //var r = GetEntriesByMarket(MarketId.Default); // okay
+            //var v = GetParentNodes(nodeContent); // okay
+            //var n = GetChildNodes(nodeContent); // okay
+
+        }
+
+        #endregion
+
+
+    }
 }

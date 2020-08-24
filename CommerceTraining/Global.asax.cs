@@ -17,12 +17,15 @@ namespace CommerceTraining
         {
             base.RegisterRoutes(routes);
 
-            routes.MapRoute("MarketsDemoRoute", "marketsdemo/{action}", new { controller = "MarketsDemo", action = "Index" });
             routes.MapRoute("SearchDemoRoute", "searchdemo/{action}", new { controller = "SearchDemo", action = "Index" });
+            routes.MapRoute("FindDemoRoute", "findsearchdemo/{action}", new { controller = "FindSearchDemo", action = "Index" });
+            routes.MapRoute("MarketsDemoRoute", "marketsdemo/{action}", new { controller = "MarketsDemo", action = "Index" });
             routes.MapRoute("WareHouseDemoRoute", "warehousedemo/{action}", new { controller = "WareHouseDemo", action = "Index" });
             routes.MapRoute("InventoryDemoRoute", "inventorydemo/{action}", new { controller = "InventoryDemo", action = "Index" });
             routes.MapRoute("BisFoundDemoRoute", "bisfound/{action}", new { controller = "BisFound", action = "Index" });
+            routes.MapRoute("PromDemoRoute", "demopromo/{action}", new { controller = "DemoPromo", action = "Index" });
             routes.MapRoute("PaymentDemoRoute", "paymentdemo/{action}", new { controller = "PaymentDemo", action = "Index" });
+            routes.MapRoute("ClassDemos", "classDemos/{controller}/{action}", new { action = "Index" });
         }
     }
 }

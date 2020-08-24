@@ -22,8 +22,6 @@ namespace CommerceTraining.Models.Catalog
         , Description = "Use with mens shirts")]
     public class ShirtVariation : DefaultVariation
     {
-
-
         [Searchable]
         [IncludeInDefaultSearch]
         public virtual string Size { get; set; }
@@ -33,6 +31,9 @@ namespace CommerceTraining.Models.Catalog
         public virtual string Color { get; set; }
 
         public virtual bool CanBeMonogrammed { get; set; }
+
+        // added for adv. 
+        //public virtual bool RequireSpecialShipping { get; set; }... moved into "base"
 
         [Searchable]
         [IncludeValuesInSearchResults]
@@ -53,20 +54,27 @@ namespace CommerceTraining.Models.Catalog
 
         public virtual string theTaxCategory { get; set; }
 
+
         Injected<IContentLoader> _loader;
-        
-        /* out-commented for now, ServiceAPI 5 complaints, rewrite this*/
-        //public override void SetDefaultValues(ContentType contentType) 
-        //{
-        //    base.SetDefaultValues(contentType);
+        //Injected<ReferenceConverter> _refConv;
+        public override void SetDefaultValues(ContentType contentType)
+        {
+            base.SetDefaultValues(contentType);
 
-        //    var myCategory = _loader.Service.Get<FashionNode>(this.ParentLink); //
+            CatalogContentBase myParent = _loader.Service.Get<CatalogContentBase>(this.ParentLink);
 
-        //    // sooo much easier now
-        //    this.TaxCategoryId = int.Parse(myCategory.TaxCategories);
-        //    this.theTaxCategory = CatalogTaxManager.GetTaxCategoryNameById(Int16.Parse(myCategory.TaxCategories));
+            // Changed so the ServiceAPI works
+            if (myParent.GetOriginalType() == typeof(NodeContent))
+            {
 
-        //}
+                FashionNode fashionNode = (FashionNode)myParent;
+
+                // sooo much easier now 
+                this.TaxCategoryId = int.Parse(fashionNode.TaxCategories);
+                this.theTaxCategory = CatalogTaxManager.GetTaxCategoryNameById(Int16.Parse(fashionNode.TaxCategories));
+
+            }
+        }
 
 
     }

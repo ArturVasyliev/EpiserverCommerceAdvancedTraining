@@ -84,6 +84,15 @@
     @using (Html.BeginForm("AddLabAssociations", "AdminPage"))
     {
         <div>
+            <input type="submit" value="Add" />
+        </div>
+    }
+</div>
+<div>
+    Add Association CMS-way
+    @using (Html.BeginForm("AddAssociation", "AdminPage"))
+    {
+        <div>
             <input type="submit" value="Create" />
         </div>
     }

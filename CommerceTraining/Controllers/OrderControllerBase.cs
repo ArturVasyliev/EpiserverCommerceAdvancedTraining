@@ -10,9 +10,7 @@ using EPiServer.Commerce.Marketing;
 using Mediachase.Commerce.Customers;
 using System;
 using EPiServer.Security;
-
-// For PrincipalInfo.CurrentPrincipal.GetContactId();
-using Mediachase.Commerce.Security; 
+using Mediachase.Commerce.Security; // For PrincipalInfo.CurrentPrincipal.GetContactId();
 using Mediachase.Commerce;
 using CommerceTraining.Models.Catalog;
 using EPiServer.ServiceLocation;
@@ -74,17 +72,59 @@ namespace CommerceTraining.Controllers
 
             // Might want to clean-up among addresses, payments and Shipments
             // If the payment step failed in the CheckOutController the IPayment lingers in the cart
-            
+            // ...my example for "PayMe"
+
+            List<IPayment> paymentList = new List<IPayment>();
+
+            if (paymentList.Count != 0) // quick fix, for now
+            {
+                foreach (IOrderForm item in cart.Forms)
+                {
+                    foreach (IPayment p in item.Payments)
+                    {
+                        paymentList.Add(p);
+                    }
+                }
+
+                foreach (var p in paymentList)
+                {
+                    foreach (IOrderForm item in cart.Forms)
+                    {
+                        item.Payments.Remove(p);
+                    }
+                }
+            }
+
             return cart;
         }
 
         public string GetPromotions(ICart cart)
         {
-            // ...very simple, mostly for verification 
+            // ...very simple, mostly for verification and/or maybe do something 
+            // depending on the descriptions we get back
             String str = String.Empty;
 
             var rewardDescriptions = _promotionEngine.Run(cart).ToList();
             rewardDescriptions.ForEach(r => str += r.Description);
+
+            #region just checking, not doing anything with this
+
+            IEnumerable<RedemptionDescription> redemptions;
+            RedemptionLimitsData red;
+
+            foreach (var item in cart.GetAllLineItems())
+            {
+                decimal d = item.GetEntryDiscount();
+                Money m = item.GetDiscountedPrice(cart.Currency);
+            }
+
+            foreach (var item in rewardDescriptions)
+            {
+                red = item.Promotion.RedemptionLimits;
+                redemptions = item.Redemptions;
+            }
+
+            #endregion
 
             // example with Coupons in QS
 
@@ -108,6 +148,8 @@ namespace CommerceTraining.Controllers
             cart.UpdateInventoryOrRemoveLineItems((item, issue) =>
                 validationMessages += CreateValidationMessages(item, issue)
                 , _inventoryProcessor);
+
+            // if it fit in, we could do... cart.ApplyDiscounts() ... have a few overloads we could use
 
             return validationMessages;
         }

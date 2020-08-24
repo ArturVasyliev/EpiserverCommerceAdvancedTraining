@@ -83,24 +83,24 @@
         }
     </div>
 
-<hr />
-<div>
-    @using (Html.BeginForm("SetInventory", "Variation"))
-    {
-        <div>
-            <input type="submit" value="Set inventory" />
-        </div>
-    }
-</div>
+    <hr />
+    <div>
+        @using (Html.BeginForm("SetInventory", "Variation"))
+        {
+            <div>
+                <input type="submit" value="Set inventory" />
+            </div>
+        }
+    </div>
 
-<div>
-    @using (Html.BeginForm("UpdateInventory", "Variation"))
-    {
-        <div>
-            <input type="submit" value="Update inventory" />
-        </div>
-    }
-</div>
+    <div>
+        @using (Html.BeginForm("UpdateInventory", "Variation"))
+        {
+            <div>
+                <input type="submit" value="Update inventory" />
+            </div>
+        }
+    </div>
 
     <div>
         @Html.PropertyFor(M => M.ProductArea)
@@ -108,7 +108,6 @@
 
 
 } @* =============== End Related-Area =============== *@
-
 <div>
     @using (Html.BeginForm("DoLowLevelDtoEdit", "Variation"))
     {
@@ -167,29 +166,15 @@
     <strong>Default Price: </strong> @Html.PropertyFor(m => m.priceString)
 </div>
 
-
 <div>
     <strong>Discount Saved Money: </strong> @Html.PropertyFor(m => m.betaDiscountPrice)
 </div>
 
 <div>
-    <strong>The customer group price:</strong> 
+    <strong>The customer group price:</strong>
     @*@Model.theRightPriceToPlace.ToString("C")*@
     @Model.CustomerPricingPrice.UnitPrice.ToString()
 </div>
-
-@*<div>
-    <strong>Override Price(s)</strong>
-    <ul>
-        @foreach (Mediachase.Commerce.Pricing.IPriceValue item in Model.overridePrices)
-        {
-            <li>
-                @item.UnitPrice.ToString() @*
-                @item.CustomerPricing.PriceTypeId @item.CustomerPricing.PriceCode*@
-            @*</li>
-        }
-    </ul>
-</div>*@
 
 <div>
     <strong>PricingLab price:</strong>
@@ -203,7 +188,7 @@
 <div>
     <strong>Tax info</strong>
     <div>
-       Tax OldScool: @Model.Tax.ToString()
+        Tax OldScool: @Model.Tax.ToString()
 
         @*Tax: @String.Format(, @Model.Tax) @Model.Tax*@
     </div>
@@ -220,7 +205,7 @@
         Tax NewSchool
         @Model.TaxNewSchool
     </div>
-    
+
 </div>
 <hr />
 <div>
@@ -234,7 +219,7 @@
     {
         Disabled = "disabled";
     }
-   
+
 }
 
 <div>
@@ -252,7 +237,6 @@
         </div>
     }
 </div>
-
 
 <div>
     @using (Html.BeginForm("AddToWishList", "Variation"))

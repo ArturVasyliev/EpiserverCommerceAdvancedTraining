@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using EPiServer;
@@ -63,7 +63,32 @@ namespace CommerceTraining.Controllers
 
         public IPriceValue GetTheRigtPrice() // depending on inventory level
         {
-            return null; // for now
+
+            return null;
+        }
+
+
+        Injected<IInventoryService> inventoryService;
+        private CustomerPricing CheckInventory(DefaultVariation currentContent)
+        {
+            CustomerPricing localcheck = new CustomerPricing();
+
+            // need some logic to pick the right price-group
+            // Could have DefaultPrice, BatchPrice and WebPrice ... and groups accordingly to those prices
+
+            // if PreOrder (the batch qty) > 
+            InventoryRecord record = inventoryService.Service.Get(currentContent.Code, "London");
+            var a = record.AdditionalQuantity; // (now Reserved... not used in bizlogic API says...but it is)
+            //var x = record.a
+
+            /* Suggestion:
+             * Having a prop at the sku like BatchQty set to e.g. 100
+             * Having a prop at the SKU for original inventory
+             * when PurchaseAvailable reach that number we revert to the Default Price
+             * ...have 10 in stock... gets a batch of 100 --> 110 in stock
+             * When it reach 10 
+            */
+            return localcheck;
         }
     }
 }

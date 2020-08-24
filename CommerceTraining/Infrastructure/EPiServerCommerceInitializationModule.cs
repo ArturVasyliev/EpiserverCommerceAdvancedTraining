@@ -49,15 +49,24 @@ namespace CommerceTraining.Infrastructure
             // routing adv.
             CatalogRouteHelper.MapDefaultHierarchialRouter(RouteTable.Routes, () =>
             {
+                // the scheduled job still have troubles
                 var contentLoader = ServiceLocator.Current.GetInstance<IContentLoader>();
-                //var sp = new ContentReference(9); // The start page, If epi-Find-error in exercise
-                var startPage = contentLoader.Get<PageData>(ContentReference.StartPage);
+
+                // If epi-Find-error in exercise, it's the "catalog start"
+                var startPage = new ContentReference(9);
+
+                //var startPage = contentLoader.Get<PageData>(ContentReference.StartPage);
                 if (startPage == null) // should maybe check for the "setting-prop"
                 {
                     return ContentReference.WasteBasket; //.StartPage;
                 }
-                var homePage = startPage as StartPage;
-                return homePage != null ? homePage.Settings.catalogStartPageLink : ContentReference.StartPage;
+
+                //var homePage = startPage as StartPage;
+
+                //return homePage != null ? homePage.Settings.catalogStartPageLink : ContentReference.StartPage;
+
+                // if Find issues
+                return startPage;
             }
             , false);
 
@@ -73,7 +82,7 @@ namespace CommerceTraining.Infrastructure
 
             #region Events CMS & ECF
 
-            // Works nice...fairly new for Catalog
+            // Nice for Entry Pricing and Inventory updates
             CatalogKeyEventBroadcaster e =
                 ServiceLocator.Current.GetInstance<CatalogKeyEventBroadcaster>();
 
@@ -86,7 +95,7 @@ namespace CommerceTraining.Infrastructure
             // this is the old one for Orders
             //OrderContext.Current.OrderGroupUpdated += Current_OrderGroupUpdated; 
 
-            // New shiny stuff for Orders ...\Infrastructure\CartAndCheckout\NewOrderEvents.cs
+            // Good stuff for Orders ...\Infrastructure\CartAndCheckout\NewOrderEvents.cs
             //IOrderRepositoryCallback orc = 
             //    ServiceLocator.Current.GetInstance<IOrderRepositoryCallback>();
 
@@ -131,6 +140,11 @@ namespace CommerceTraining.Infrastructure
             EventReciever.RecordInventoryEvent(sender, e);
         }
 
+        //void Instance_PublishingContent(object sender, ContentEventArgs e)
+        //{
+
+        //}
+
         void e_PriceUpdated(object sender, PriceUpdateEventArgs e)
         {
             EventReciever.RecordPriceEvent(sender, e);
@@ -158,8 +172,8 @@ namespace CommerceTraining.Infrastructure
 
         private void DisablePromotionTypes(InitializationEngine context)
         {
-            //var promotionTypeHandler = 
-            //    context.Locate.Advanced.GetInstance<PromotionTypeHandler>();
+            var promotionTypeHandler = 
+                context.Locate.Advanced.GetInstance<PromotionTypeHandler>();
 
             /*
             //To disable all built-in promotion types
@@ -186,11 +200,11 @@ namespace CommerceTraining.Infrastructure
             DependencyResolver.SetResolver(new StructureMapDependencyResolver(context.StructureMap()));
 
             context.Services.AddSingleton<IPriceOptimizer, DemoPriceOptimizer>();
-        }
 
-        public void Register(TemplateModelCollection viewTemplateModelRegistrator)
-        {
+            //context.Services.AddSingleton<IPriceService, MyPriceService>();
 
+            //context.Services.AddSingleton<PromotionEngineContentLoader, CustomPromotionEngineContentLoader>();
+           
         }
     }
 }

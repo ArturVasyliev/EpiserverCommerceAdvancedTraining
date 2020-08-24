@@ -2,21 +2,11 @@
 @using EPiServer.Web.Mvc.Html
 @using Mediachase.Commerce.Pricing
 @using CommerceTraining.Controllers
-@using EPiServer.ServiceLocation
-@using EPiServer.Commerce.Order
-@using Mediachase.Commerce.Orders
-@using Mediachase.Commerce.Customers
-@using Mediachase.Commerce
-
-
-{
-
-}
 
 @model CommerceTraining.Models.Catalog.DefaultVariation
 
 <div>
-    @Html.PropertyFor(m => m.MainBody)
+  @Html.PropertyFor(m => m.MainBody)
 </div>
 
 <div>
@@ -34,49 +24,5 @@
 </div>
 
 <div>
-    Luxury tax test
-    @*Should not do like this, it's just for test of taxes, 
-        have no controller to put it in... yet*@ 
-
-    @{decimal d1 = 0; }
-
-    @{ ICurrentMarket marketS = ServiceLocator.Current.GetInstance<ICurrentMarket>();
-
-
-        if (marketS.GetCurrentMarket().MarketId == "UK")
-        {
-
-            ITaxCalculator t = ServiceLocator.Current.GetInstance<ITaxCalculator>();
-            IOrderGroupFactory f = ServiceLocator.Current.GetInstance<IOrderGroupFactory>();
-
-            IOrderRepository r = ServiceLocator.Current.GetInstance<IOrderRepository>();
-
-            IMarket market = marketS.GetCurrentMarket();
-            Guid currCust = CustomerContext.Current.CurrentContactId;
-            string bogusCart = "BogusCart";
-
-            ICart cart = r.LoadOrCreateCart<ICart>(
-                currCust, bogusCart);
-            IOrderAddress address = new OrderAddress
-            {
-                CountryCode = "UK",
-                CountryName = "UK",
-                City = "London",
-                Name = "BogusAddressName",
-            };
-
-            ILineItem li = f.CreateLineItem(Model.Code, cart);
-            li.PlacedPrice = 100;
-            li.Quantity = 1;
-            cart.AddLineItem(li);
-
-            decimal ddd = t.GetSalesTax(li, market, address, new Money(0, market.DefaultCurrency)).Amount;
-
-            d1 = ddd;
-        }
-    }
-
-</div>
-<div>
-    @Html.Raw(d1);
+    The right price (depending on batch... and inventory)
 </div>

@@ -62,6 +62,7 @@ namespace CommerceTraining.Controllers
 
         private readonly IPriceService _priceService;
         private readonly IPriceDetailService _priceDetailService;
+        //private readonly ICurrentMarket _currentMarket2;
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderGroupFactory _orderGroupFactory;
         private readonly IPromotionEngine _promotionEngine;
@@ -72,15 +73,20 @@ namespace CommerceTraining.Controllers
         private readonly IWarehouseRepository _warehouseRepository;
         private readonly IInventoryService _inventoryService;
         private readonly MyPriceCalculator _myPriceCalculator;
-        private readonly ITaxCalculator _taxCalculator;
+
+        static Injected<IContentLoader> xyz;
 
         private static bool IsOnLine { get; set; } // QuickFix
 
         // added for Adv. Cart clean, check/add second ship & pay
         CartAndCheckoutService ccService = new CartAndCheckoutService();
+        CustomTaxManager customTaxManager = new CustomTaxManager();
 
-        // use "intercept" instead in the Init-Module
-        CustomTaxManager ctm = new CustomTaxManager();
+
+        // ToDo: move to .ctor
+        //Injected<ICatalogSystem> _cat; // just to demo
+        //Injected<ReferenceConverter> _refConv;
+        //Injected<PricingLoader> _priceLoader;
 
         public VariationController(
             IContentLoader contentLoader
@@ -100,12 +106,12 @@ namespace CommerceTraining.Controllers
             , IInventoryService inventoryService
             , IWarehouseRepository warehouseRepository
             , MyPriceCalculator myPriceCalculator
-            , ITaxCalculator taxCalculator
         )
-            : base(contentLoader, urlResolver, assetUrlResolver, thumbnailUrlResolver, currentMarket)
+            : base(contentLoader, urlResolver, assetUrlResolver, thumbnailUrlResolver,currentMarket)
         {
             _priceService = priceService;
             _priceDetailService = pricedetailService;
+            //_currentMarket2 = currentMarket;
             _promotionEngine = promotionEngine;
             _orderRepository = orderRepository;
             _orderGroupFactory = orderGroupFactory;
@@ -116,9 +122,20 @@ namespace CommerceTraining.Controllers
             _inventoryService = inventoryService;
             _warehouseRepository = warehouseRepository;
             _myPriceCalculator = myPriceCalculator;
-            _taxCalculator = taxCalculator;
         }
 
+        public ActionResult DoLowLevelDtoEdit(ShirtVariation currentContent, string newText)
+        {
+            //Old school way to change using Dtos directly
+            var catSystem = ServiceLocator.Current.GetInstance<ICatalogSystem>();
+            var shirtDto = catSystem.GetCatalogEntryDto(currentContent.Code);
+            var entryRow = shirtDto.CatalogEntry.First();
+            MetaObject metaObject = MetaObject.Load(MetaDataContext.Instance, entryRow.CatalogEntryId, entryRow.MetaClassId);
+            metaObject["MainBody"] = newText;
+            metaObject.AcceptChanges(MetaDataContext.Instance);
+
+            return RedirectToAction("Index");
+        }
 
 
         public ActionResult Index(ShirtVariation currentContent)
@@ -132,15 +149,20 @@ namespace CommerceTraining.Controllers
 
             PricingService pSrvs = new PricingService(
                 _priceService, _currentMarket, _priceDetailService);
+            // used elsewere
+            //currentContent.GetCustomerPrices() // works with the R/O-pricingLoader, would miss the custom SaleTypes
+            //currentContent.GetPrices() // this one also uses the R/O-Loader ... unusable
 
             #region Newpromotions
 
             // New promotions
             decimal savedMoney = 0;
             string rewardDescription = String.Empty;
+            //IEnumerable<RewardDescription> rewards;
 
+            // get prices incl. "BasePrice"
+            //IPriceValue salePrice = BestPricingCalculatorEver.GetSalePrice(currentContent.ContentLink);//
             IPriceValue salePrice = _myPriceCalculator.GetSalePrice(currentContent, 1);
-
             // the below does the second "Evaluate"
             var descr = _promotionEngine.Evaluate(currentContent.ContentLink).ToList();
             if (descr.Count == 0) // No promos
@@ -162,11 +184,13 @@ namespace CommerceTraining.Controllers
             if (descr.Count() >= 1)
             {
                 savedMoney = descr.First().Percentage * salePrice.UnitPrice.Amount / 100;
-                Session["SavedMoney"] = savedMoney; // ...will improve this
+                //rewardDescription = descr.First().Description;
+                Session["SavedMoney"] = savedMoney;
             }
             else
             {
                 savedMoney = 0;
+                //rewardDescription = "No discount";
             }
 
             // ...this goes to PriceCalc-discount
@@ -174,16 +198,62 @@ namespace CommerceTraining.Controllers
 
             #endregion
 
+            #region just checking on promos
+            //List<RewardDescription> rewards = new List<RewardDescription>();
+            //rewards = _promotionEngine.Evaluate(currentContent.ContentLink).ToList();
+            //IEnumerable<DiscountedEntry> entries = _promotionEngine.GetDiscountPrices(currentContent.ContentLink, _currentMarket.GetCurrentMarket());
+            #endregion
+
+            #region FindStuff
+
+
+            // new Find-Stuff - need to check this out... 
+            // FindQueries Qs = new FindQueries();
+            // Qs.NewExtensionMethods(currentContent);
+            // Qs.SDKExamples(currentContent.ContentLink);
+            #endregion
+
+            #region Checking some for routing and http-ctx
+            /*
+            var str = currentContent.GetOriginalType().Name; // not for redirect
+            var x = ServiceLocator.Current.GetInstance<TemplateResolver>();
+           
+            RequestContext requestContext = new RequestContext(base.HttpContext, base.RouteData);
+            var parentStack = requestContext.HttpContext.Items[ContentContext.ContentContextKey] as
+               Stack<ContentContext.ContentPropertiesStack>;
+
+            string controller = requestContext.GetController();
+            var t = x.Resolve(requestContext.HttpContext, new CartPage(), TemplateTypeCategories.MvcController); // could use .Name
+            */
+            #endregion
+
+            #region LookingAround (incl. new and old Promo-engine)
+
+            //LoadingExamples(currentContent);
+            //CheckPrices(currentContent);
+
+            // Have to fake a cart... but it looks good
+            //string rewardDescription = String.Empty;
+
+            //decimal savedMoney = CheckBetaPromotions(currentContent, out rewardDescription);
+
+            //var theProxy = currentContent.GetType();
+            //var yourClass = currentContent.GetOriginalType();
+
+            //StoreHelper.GetDiscountPrice(currentContent.LoadEntry());
+            //StoreHelper.GetSalePrice(currentContent.LoadEntry()
+
+            #endregion
+
             #region Relations, parent - child, etc.
 
-            // just checking...
             CheckOnRelations(currentContent);
 
             #endregion
 
             #region RoCe - check this
 
-            // quick-check - nothing back
+            // quick-fix - nothing back
             ICart dummyCart = _orderRepository.LoadOrCreateCart<ICart>(new Guid(), "DummyCart");
             ILineItem lineItem = _orderGroupFactory.CreateLineItem(currentContent.Code, dummyCart);
             var c2 = _lineItemCalculator.GetExtendedPrice(lineItem, _currentMarket.GetCurrentMarket().DefaultCurrency);
@@ -198,7 +268,6 @@ namespace CommerceTraining.Controllers
 
             //_currentMarket.GetCurrentMarket().DefaultCurrency.Format(cu)
             //Currency.SetFormat(_currentMarket.GetCurrentMarket().DefaultCurrency.Format.CurrencySymbol);
-
             string thePriceString = string.Empty;
 
             if (currentContent.GetDefaultPrice().UnitPrice.Amount == 0)
@@ -218,6 +287,7 @@ namespace CommerceTraining.Controllers
                 priceString = thePriceString,
                 //theRightPriceToPlace = GetThePriceToPlace(currentContent), // tiered pricing...old, not in use
                 CustomerPricingPrice = GetCustomerPricingPrice(currentContent),
+                //discountPrice = CustomStoreHelper.GetDiscountPrice(currentContent.LoadEntry(CatalogEntryResponseGroup.ResponseGroup.Nodes)),
                 discountPriceNew = _lineItemCalculator.GetDiscountedPrice(lineItem, _currentMarket.GetCurrentMarket().DefaultCurrency).Amount,
 
                 image = GetDefaultAsset((IAssetContainer)currentContent),
@@ -227,6 +297,7 @@ namespace CommerceTraining.Controllers
                 WishlistUrl = wUrl, // new stuff - not yet in course
 
                 // Added for Adv. below
+                //labPrice = BestPricingCalculatorEver.GetDiscountPrice(currentContent, 1, promoPrice), // , "Fashion", "Shirts"
                 labPrice = _myPriceCalculator.CheckDiscountPrice(currentContent, 1, promoPrice),
                 overridePrices = pSrvs.GetPrices(currentContent.Code),
                 PromoString = rewardDescription, // in #region LookingAround
@@ -242,7 +313,7 @@ namespace CommerceTraining.Controllers
                 currentMarket = GetCurrentMarket(),
                 marketOwner = GetMarketOwner(),
 
-                // Associations-check
+                // Associations
                 //Associations = GetAssociatedEntries(currentContent), // IEnumerable<ContentReference> // Remove when Aggregation is done
                 //AssociationMetaData = GetAssociationMetaData(currentContent), // string // Remove when Aggregation is done
                 AssocAggregated = GetAggregatedAssocciations(currentContent), // Dictionary<string, ContentReference> // The final thing
@@ -261,18 +332,6 @@ namespace CommerceTraining.Controllers
             };
 
             return View(model);
-        }
-
-        public ActionResult DoLowLevelDtoEdit(ShirtVariation currentContent, string newText)
-        {
-            //Old school way to change using Dtos directly
-            var catSystem = ServiceLocator.Current.GetInstance<ICatalogSystem>();
-            var shirtDto = catSystem.GetCatalogEntryDto(currentContent.Code);
-            var entryRow = shirtDto.CatalogEntry.First();
-            MetaObject metaObject = MetaObject.Load(MetaDataContext.Instance, entryRow.CatalogEntryId, entryRow.MetaClassId);
-            metaObject["MainBody"] = newText;
-            metaObject.AcceptChanges(MetaDataContext.Instance);
-            return RedirectToAction("Index");
         }
 
         private void CheckOnRelations(ShirtVariation currentContent)
@@ -295,43 +354,43 @@ namespace CommerceTraining.Controllers
 
         public IEnumerable<string> GetTaxStrings(ShirtVariation currentContent)
         {
-            List<string> temp = new List<string>();
+            List<string> tempTaxStrings = new List<string>();
 
-            TaxValue[] taxes = ctm.GetTaxes((int)currentContent.TaxCategoryId);
+            TaxValue[] taxes = customTaxManager.GetTaxes((int)currentContent.TaxCategoryId);
 
             if (taxes.Count() > 0)
             {
                 foreach (TaxValue item in taxes)
                 {
-                    temp.Add(item.TaxType + " " + item.Name + " " + item.Percentage.ToString() + "%");
+                    tempTaxStrings.Add(item.TaxType + " " + item.Name + " " + item.Percentage.ToString() + "%");
                 }
             }
             else
             {
-                temp.Add("...no taxes");
+                tempTaxStrings.Add("...no taxes");
             }
 
-            return temp;
+            return tempTaxStrings;
         }
 
         private decimal GetTaxOldSchool(ShirtVariation currentContent)
         {
-            TaxValue[] tv = ctm.GetTaxes((int)currentContent.TaxCategoryId);
-            if (tv.Count() > 0)
+            TaxValue[] taxValues = customTaxManager.GetTaxes((int)currentContent.TaxCategoryId);
+            if (taxValues.Count() > 0)
             {
-                return (decimal)tv.FirstOrDefault().Percentage * GetThePriceToPlace(currentContent) / 100;
+                return (decimal)taxValues.FirstOrDefault().Percentage * GetThePriceToPlace(currentContent) / 100;
             }
             else
             {
                 return 0;
             }
+
         }
 
-        // could have use of this
-        //Injected<IOrderGroupCalculator> _orderGroupCalc;
+        Injected<ITaxCalculator> _taxCalc;
+
         private string GetTaxNewSchool(ShirtVariation currentContent)
         {
-            // this is only for the "intercepted" Tax-Calc.
             IMarket market = _currentMarket.GetCurrentMarket();
             Guid currCust = CustomerContext.Current.CurrentContactId;
             string bogusCart = "BogusCart";
@@ -342,44 +401,28 @@ namespace CommerceTraining.Controllers
             ILineItem lineItem = _orderGroupFactory.CreateLineItem(currentContent.Code, cart);
             lineItem.Quantity = 1;
             lineItem.PlacedPrice = GetCustomerPricingPrice(currentContent).UnitPrice.Amount;
+            lineItem.TaxCategoryId = currentContent.TaxCategoryId;
             cart.AddLineItem(lineItem);
-            IOrderAddress address = null;
 
-            // Checking on type... only for tax-demo
-            // Have Stockholm (silly override) and London (tax-jurisdiction)
-            if (currentContent.GetOriginalType() == typeof(ShirtVariation))
-            {
-                address = new OrderAddress
-                {
-                    CountryCode = "sv",
-                    CountryName = "Sweden",
-                    City = "Stockholm",
-                    Name = "BogusAddressName",
-                };
-            }
+            IOrderAddress bogusAddress = _orderGroupFactory.CreateOrderAddress(cart);
+            bogusAddress.CountryCode = "sv";
+            bogusAddress.City = "Stockholm";
+            bogusAddress.CountryName = "Sweden";
 
-            // could do something like this... done in the accessory-view now
-            if (currentContent.GetOriginalType() == typeof(ClothesAccessory))
-            {
-                // Tax-direct ... use on Luxury-SKU (accessory)
-                 address = new OrderAddress
-                {
-                    CountryCode = "UK",
-                    CountryName = "UK",
-                    City = "London",
-                    Name = "BogusAddressName",
-                };
-            }
+            string str = String.Empty;
+            //str += _taxCalc.Service.GetTaxTotal(cart, market, market.DefaultCurrency).Amount.ToString();
 
-            Money tax = _taxCalculator.GetSalesTax(lineItem, market, address
-                , new Money(0, market.DefaultCurrency));
+            var taxValues = Enumerable.Empty<ITaxValue>();
+            taxValues = OrderContext.Current.GetTaxes(Guid.Empty, currentContent.theTaxCategory, "sv", bogusAddress);
 
-            return tax.ToString();
+            str = _taxCalc.Service.GetSalesTax(lineItem, market, bogusAddress, new Money(0m,"SEK")).ToString();
+            
+
+            return str;
         }
 
         private decimal GetThePriceToPlace(ShirtVariation currentContent)
         {
-            // This is the original...
             PricingService myPricing = new PricingService(
              _priceService, _currentMarket, _priceDetailService);
 
@@ -393,6 +436,7 @@ namespace CommerceTraining.Controllers
              _priceService, _currentMarket, _priceDetailService);
 
             return myPricing.GetTheRightCustomerPrice(currentContent); // for the group and so forth
+
         }
 
         private string GetCurrentMarket()
@@ -403,9 +447,11 @@ namespace CommerceTraining.Controllers
         // Remove when cleaning up - just looking around
         private void CheckNewPromotions(ShirtVariation currentContent)
         {
+            //ServiceLocator.Current.GetInstance<IPromotionEngine>().Run(OrderGroup);
             PromotionProcessorResolver pr = ServiceLocator.Current.GetInstance<PromotionProcessorResolver>();
             IContentLoader cl = ServiceLocator.Current.GetInstance<IContentLoader>();
             CampaignInfoExtractor ci = ServiceLocator.Current.GetInstance<CampaignInfoExtractor>();
+
         }
 
         public ActionResult AddToCart
@@ -414,10 +460,12 @@ namespace CommerceTraining.Controllers
             // New
             var cart = _orderRepository.LoadOrCreateCart<ICart>(
                 PrincipalInfo.CurrentPrincipal.GetContactId(), "Default");
-            //OrderContext.Current.GetCart() --> older
+            //OrderContext.Current.GetCart()
 
             // new line, check in TrousersController
             cart.Properties["SpecialShip"] = false;
+
+            ICollection<IPayment> payments = cart.GetFirstForm().Payments;
 
             string code = currentContent.Code;
 
@@ -433,7 +481,7 @@ namespace CommerceTraining.Controllers
 
                 // older
                 var justChecking = lineItem.GetDiscountedPrice(cart.Currency);
-
+                
                 // new, just a check
                 var dd = _promotionEngine.Evaluate(currentContent.ContentLink);
                 if (dd.Count() != 0)
@@ -444,10 +492,15 @@ namespace CommerceTraining.Controllers
                 {
                     var ddd = 0;
                 }
+                
+                //lineItem.TrySetDiscountValue(()
+                //ILineItemDiscountAmount lineItemDiscountAmount = null;
+                //lineItemDiscountAmount.EntryAmount = 10;
 
                 cart.AddLineItem(lineItem);
 
-                // need a check here
+                // new - need the RewardDescriptions as well
+                // don't get the discount for the first LI...?
                 cart.ApplyDiscounts();
             }
             else
@@ -473,10 +526,28 @@ namespace CommerceTraining.Controllers
 
             if (validLineItem)
             {
+                // not good, but...as the SDK says
+                /* -- Line item calculator -- 
+                 * The LineItemCalculator calculates a line item's extended price 
+                 *   and discounted price.Extended price. Includes order-level discount amount 
+                 *   (spread over all line items in the shipment) and any line item discount amount.
+                 * Discounted price. Only calculates the price with the "line item discount amount," 
+                 * that is, the discount for a specific item.*/
+
+                // ...have to do something like this for now - out-commented for now
+                //LineItem li = (LineItem)lineItem;
+                //li.LineItemDiscountAmount = (decimal)Session["SavedMoney"]; // ...and it gets into CM
+
+                // doesn't seem "to bite"
+                //lineItem.Properties["LineItemDiscountAmount"] = (decimal)Session["SavedMoney"];
+                //InMemoryLineItem memLI = (InMemoryLineItem)lineItem;
 
                 lineItem.Properties["Monogram"] = Monogram;
                 lineItem.Properties["RequireSpecialShipping"] = currentContent.RequireSpecialShipping;
 
+                // Below - need to set the cart.Properties["SpecialShip"] = false; ... it's null now
+                // Bug in 11, rewritten for now
+                //ccService.IsSecondShipmentReqired(cart);
                 ccService.CheckOnLineItems(cart);
 
                 // new October 2017 - gives the discount set properly in the cart
@@ -484,7 +555,7 @@ namespace CommerceTraining.Controllers
 
                 _orderRepository.Save(cart);
 
-                // dummy for now... RoCe: Fix later
+                // dummy for now... RoCe: Fix
                 Session["SecondPayment"] = false;
             }
 
@@ -495,13 +566,134 @@ namespace CommerceTraining.Controllers
             // get to the cart page, if needed
             return RedirectToAction("Index", new { node = cartRef, routedData = passingValue });
 
+            #region Checking on Redirects/Transfers
+            // workaround for RedirectToAction (as we do from Cart --> CheckOut)... doesn´t work at the moment from ECF-pages 
+            //Url url = _urlResolver.GetUrl(cartRef);
+            //CartPage cartPage = _contentLoader.Get<CartPage>(cartRef);
+            //var lang2 = ContentLanguage.PreferredCulture;
+            //var name = cartPage.Name;
+
+            //return RedirectToAction("Index", lang2 + "/" + name, new { passedAlong = passingValue }); // Change this in "Fund"
+            //return RedirectToAction("Index", "en/Cart", new { passedAlong = passingValue }); // works
+            //string passingValue = ch.Cart.Name; // if needed, the cart for example
+            //return RedirectToAction("Index", new { node = theRef, passedAlong = passingValue }); // nothing is happening
+
+            //return (ActionResult)View(model); //nope
+
+            //return RedirectToAction("Index", new { node = theRef, passedAlong = passingValue }); // njet
+            //Server.Transfer("http://localhost:49918" + _urlResolver.GetUrl(theRef.ToPageReference())); // njet
+
+            //return RedirectToAction("Index", new { node = theRef.ToPageReference(), passedAlong = passingValue }); 
+            //return RedirectToRoute()
+
+            //              return  RedirectToAction( new RouteValueDictionary()
+            //     new{ 
+            //          "controller" = Blah, 
+            //          "action" = Blah, 
+            //          "foo" = “Bar” 
+            //     } 
+            //));
+
+            // var x = HttpContext.Server.TransferRequest("");
+            // Response.Redirect(_urlResolver.GetUrl(theRef)); // OK
+
+            //return RedirectToAction("Index",url.Uri.OriginalString , new { passedAlong = passingValue });  // nope
+
+            //Redirect(url.ToString());
+            //return null;
+
+            #endregion
+
         }
 
+        // Optional lab in Fund. Mod. D - create a WishList and inspection in CM + config -alteration
+        public void AddToWishList(ShirtVariation currentContent)
+        {
+            CartHelper wishList = new CartHelper(CartHelper.WishListName); // note the arg.
+            wishList.AddEntry(currentContent.LoadEntry());
+            wishList.Cart.AcceptChanges();
+
+            string passingValue = currentContent.Code;
+            ContentReference theRef = currentContent.ParentLink; // maybe go here when done
+
+            // just testing
+            Response.Redirect(_urlResolver.GetUrl(theRef));
+            //RedirectToRoute()
+
+            #region Chwcking links
+
+            //var startPage = _contentLoader.Get<StartPage>(ContentReference.StartPage);
+            //var cartUrl = ServiceLocator.Current.GetInstance<UrlResolver>().GetUrl(startPage.Settings.cartPage, currentContent.Language.Name);
+
+            ////return RedirectToAction("Index","CartController", new { node = theRef, passedAlong = passingValue });
+
+            //var lang = ContentLanguage.Instance.FinalFallbackCulture.ToString();  // gets "en"
+
+            //return RedirectToAction("Index", "en/Cart", new { passedAlong = passingValue }); // works
+            //return RedirectToAction("Index", CultureInfo.CurrentCulture.TwoLetterISOLanguageName + "/Cart"
+            //    , new { passedAlong = passingValue }); // works
+            //// would you do like the above?
+
+            //// Cut´n paste from Cart
+            //StartPage home = _contentLoader.Get<StartPage>(ContentReference.StartPage);
+            //ContentReference theRef = home.Settings.checkoutPage;
+            //string passingValue = "This is fun"; // could pass the cart instead
+
+            // kolla Url.Action
+            //Server.Transfer / Server.TransferRequest
+            //Httputility
+            #endregion
+
+        }
+
+        // Fund: Pricing Extensions // more of pricing in /Pricing/PricingService...
+        private void CheckPrices(VariationContent currentContent)
+        {
+            /**/
+            //currentContent.getp
+            Entry e = CatalogContext.Current.GetCatalogEntry(currentContent.Code);
+            var p = e.PriceValues; // gets 5
+
+            IEnumerable<CatalogEntryDto.SalePriceRow> rows = CatalogContext.Current.GetCatalogEntryDto
+                (currentContent.Code, new CatalogEntryResponseGroup
+                    (CatalogEntryResponseGroup.ResponseGroup.CatalogEntryFull)).SalePrice; // zero rows
+            /**/
+
+            var salePrice = StoreHelper.GetSalePrice(currentContent.LoadEntry(), 7);
+            var discountPrice = StoreHelper.GetDiscountPrice(currentContent.LoadEntry());
+
+            var priceRef = currentContent.PriceReference; // a ContentReference
+
+            EPiServer.Commerce.SpecializedProperties.ItemCollection<EPiServer.Commerce.SpecializedProperties.Price>
+                gotPrices = currentContent.GetPrices(); // Gets all, recieve "Specialized" Price
+
+            var defaultPrice = currentContent.GetDefaultPrice(); // All Cust + qty 0 ... market sensitive
+
+            var custPrices = currentContent.GetCustomerPrices(
+                new Currency("USD")
+                , 3M
+                , true); // for the current user - fourth arg is the PriceLoader - remember EffectivePriceGroup
+
+            // the below includes TaxCategory
+            var PriceStuff = (IPricing)currentContent; // null if "a price" is N/A,
+
+            // not extensions, fairly full view of prices
+            PricingService myPricing = new PricingService(
+                _priceService, _currentMarket, _priceDetailService);
+
+            //myPricing.CheckPrices(currentContent);
+            //myPricing.GetPrices(currentContent.Code);
+
+        }
+
+        // lazy dev.
         private void LoadingExamples(ShirtVariation currentContent)
         {
+            // some of this is / will be in Find
+            //currentContent.LoadEntry(CatalogEntryResponseGroup.ResponseGroup.)
+
             ContentReference parent = currentContent.ParentLink; //...from "me" as the variation
-            IEnumerable<EntryContentBase> nodeChildren
-                = base._contentLoader.GetChildren<EntryContentBase>(parent);
+            IEnumerable<EntryContentBase> nodeChildren = base._contentLoader.GetChildren<EntryContentBase>(parent);
 
             IEnumerable<ContentReference> allLinks = currentContent.GetCategories();
 
@@ -516,13 +708,17 @@ namespace CommerceTraining.Controllers
             IEnumerable<ContentReference> parentPackages = currentContent.GetParentPackages();
 
             IMarket market = _currentMarketService.GetCurrentMarket();
-
-            // if we want to know about another market
-            bool available = currentContent.IsAvailableInMarket(market.MarketId);
+            bool available = currentContent.IsAvailableInMarket(market.MarketId); // if we want to know about another market
 
             bool available2 = currentContent.IsAvailableInCurrentMarket();
 
             ISecurityDescriptor sec = currentContent.GetSecurityDescriptor();
+
+            // CatalogContext.Current.GetCatalogEntriesDto()
+
+            //currentContent.LoadEntryDt
+
+            //ServiceLocator.Current.GetInstance<IOrderRepository>().Load<IOrderGroup>();
 
         }
 
@@ -552,8 +748,11 @@ namespace CommerceTraining.Controllers
         {
             generalWarehouseInfo.Add("Entry inventory Tracked: " + currentContent.TrackInventory.ToString());
 
+            // other code in older CommerceDemo\...\AdminPageTemplate
+            // currentContent.ApplicationId == w.ApplicationId.ToString()) &&
+            // how many FFCenters
             IEnumerable<IWarehouse> fullfillmentCenters = _warehouseRepository.List()
-                .Where(w => (w.IsActive && w.IsFulfillmentCenter));
+                .Where(w => ( w.IsActive && w.IsFulfillmentCenter));
 
             if (fullfillmentCenters.Count() > 1)
             {
@@ -567,7 +766,11 @@ namespace CommerceTraining.Controllers
             // ...there is an InventoryLoader
             foreach (var warehouse in allWarehouses)
             {
+                //specificWarehouseInfo.Add(warehouse.Code);
                 InventoryRecord inventoryRecord = _inventoryService.Get(currentContent.Code, warehouse.Code);
+
+                // Have this also
+                //var inventory = currentContent.GetStockPlacement(); // does "List"
 
                 if (inventoryRecord == null) // means that the SKU is not referenced from that WH
                 {
@@ -593,8 +796,14 @@ namespace CommerceTraining.Controllers
             generalWarehouseInfo.Add(String.Format("Total req qty: {0}", requestedQuantity)); // it adds up across WHs
         }
 
+        //Injected<IOrderGroupFactory> _ogf;
         public ActionResult RequestInventory(string code) // step through this
         {
+            // from Fund, maybe not what we want - heve more in Tran-Scope in CheckOutController
+            //IOrderGroup c = _orderRepository.Create<ICart>(""); // 
+            //c.AdjustInventoryOrRemoveLineItems();
+            //c.UpdateInventoryOrRemoveLineItems()
+
             // Get the WH
             string warehouseCode = "Nashua"; // a bit hard-coded
             //string warehouseCode = "Stocholm"; // a bit hard-coded here too
@@ -632,7 +841,6 @@ namespace CommerceTraining.Controllers
             InventoryRequest inventoryRequest =
                 new InventoryRequest(DateTime.UtcNow, requestItems, null);
             InventoryResponse inventoryResponse = _inventoryService.Request(inventoryRequest);
-
             // pseudo-code for the "key" below
             //requestItem.OperationKey = requestItem.WarehouseCode + requestItem.CatalogEntryCode + requestItem.Quantity.ToString();
 
@@ -664,21 +872,24 @@ namespace CommerceTraining.Controllers
                     _inventoryService.Request(backOrderRequest);
             }
 
+            // dbo.InventoryService - table gets the requests and accumulate
+            // inventoryService.Service.Request(requestItem);
+            // and it increases in reserved until you can´t reserve more --> "Not Success"
+
             return RedirectToAction("Index", "Variation");
         }
 
         public ActionResult CancelRequest(string code)
         {
-            // use the "key" ... "WH-location", entry & Qty are irrelevant as the "key" governs 
-            //what has happend...all are overlooked even if entered
+            // use the "key" ... "WH-location", entry & Qty are irrelevant as the "key" governs what has happend
+            // all are overlooked even if entered
 
-            List<InventoryRequestItem> requestItems = new List<InventoryRequestItem>();
-            InventoryRequestItem requestItem = new InventoryRequestItem
-            {
-                // calls for some logic
-                RequestType = InventoryRequestType.Cancel, // as a demo
-                OperationKey = TempData["key"] as string
-            };
+            List<InventoryRequestItem> requestItems = new List<InventoryRequestItem>(); // holds the "items"
+            InventoryRequestItem requestItem = new InventoryRequestItem();
+
+            // calls for some logic
+            requestItem.RequestType = InventoryRequestType.Cancel; // as a demo
+            requestItem.OperationKey = TempData["key"] as string;
 
             requestItems.Add(requestItem);
 
@@ -686,6 +897,11 @@ namespace CommerceTraining.Controllers
             InventoryResponse inventoryResponse = _inventoryService.Request(inventoryRequest);
 
             return RedirectToAction("Index", "Variation");
+
+            // Check the "Complete-method" 
+            // ...no time-limited reservation 
+            // ......could do a work-around with a timer counting down... and then cancel in code
+            // cmd-app has a custom implementation of "the provider" (CustomInventoryService.cs)
         }
 
         public ActionResult SetInventory(VariationContent currentContent)
@@ -716,7 +932,7 @@ namespace CommerceTraining.Controllers
             {
                 CatalogEntryCode = currentContent.Code,
                 WarehouseCode = "Nashua",
-                PurchaseAvailableChange = 4,
+                PurchaseAvailableChange = -4
             };
 
             _inventoryService.Adjust(theChange);
@@ -752,6 +968,7 @@ namespace CommerceTraining.Controllers
                 foreach (var item in assoc)
                 {
                     localStuff.Add(GetAssociationMetaDataSingle(item), GetAssociatedEntry(item)); // need to refactor the returntypes and the 
+                    //localStuff.Add("Nothing", ContentReference.SelfReference); // just to some back... for now
                 }
             }
             else
@@ -760,6 +977,9 @@ namespace CommerceTraining.Controllers
             }
             return localStuff;
 
+            // may need theese (supporting classes)
+            //AssociationModel otherModel = new AssociationModel();
+            //List<AssociationModel> otherModels = new List<AssociationModel>();
         }
 
         private string GetAssociationMetaDataSingle(EPiServer.Commerce.Catalog.Linking.Association assoc)
@@ -789,8 +1009,7 @@ namespace CommerceTraining.Controllers
 
         #endregion
 
-        #region Find - BoughtThisBoughtThat
-
+        #region Find - BoughThisBoughtThat
         private IEnumerable<string> GetOtherEntries(string code)
         {
             if (IsOnLine) // quick fix for checking network
@@ -801,10 +1020,8 @@ namespace CommerceTraining.Controllers
             }
             else
             {
-                List<string> localList = new List<string>
-                {
-                    "not on-line"
-                };
+                List<string> localList = new List<string>();
+                localList.Add("not on-line");
                 return localList;
             }
         }

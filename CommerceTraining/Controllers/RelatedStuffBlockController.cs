@@ -22,6 +22,11 @@ namespace CommerceTraining.Controllers
 {
     public class RelatedStuffBlockController : BlockController<RelatedStuffBlockType>
     {
+
+        /* Could do by the loader or the other ways showed here */
+        // Should have another block for the realations and the two different Asociations 
+
+        // theese two are checked at the bottom
         public IEnumerable<Relation> Relations { get; set; }
         public IEnumerable<Association> Associations { get; set; }
 
@@ -53,7 +58,15 @@ namespace CommerceTraining.Controllers
         public override ActionResult Index(RelatedStuffBlockType currentBlock)
         {
             ContentReference cRef = currentBlock.TheRef; // gets null, even though it´s set in the model class
-            
+            //GetInfo(currentBlock);
+
+            GetContentName();
+            GetParentContentName();
+
+            GetAssociations();
+
+            CheckOtherStuff();
+
             ContentReference p = OtherClass.proppen; // if we can make it happen - gets the CastleProxy
 
             //var x =  p.;
@@ -222,5 +235,15 @@ namespace CommerceTraining.Controllers
             return loader.Service.Get<IContent>(parentRef).Name; // the parent node for the variation
         }
 
+
+        Injected<IRelationRepository> _relRep;
+        Injected<IAssociationRepository> _assocRep;
+        // Injected<IRelationLoader> ... no such
+        private void CheckOtherStuff()
+        {
+            // okay below
+            this.Relations = _relRep.Service.GetRelationsByTarget<EntryRelation>(TheContentImOn);
+            this.Associations = _assocRep.Service.GetAssociations(TheContentImOn);
+        }
     }
 }
