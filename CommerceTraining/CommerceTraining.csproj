@@ -422,6 +422,7 @@
     <Compile Include="Controllers\CatalogControllerBase.cs" />
     <Compile Include="Controllers\InventoryDemoController.cs" />
     <Compile Include="Controllers\MarketsDemoController.cs" />
+    <Compile Include="Controllers\MyPackageController.cs" />
     <Compile Include="Controllers\NodeController.cs" />
     <Compile Include="Controllers\NodeListingBlockController.cs" />
     <Compile Include="Controllers\OrderController.cs" />
@@ -693,6 +694,7 @@
     <Content Include="Views\FindSearchDemo\FindQueryIntegrated.cshtml" />
     <Content Include="Views\FindSearchDemo\Index.cshtml" />
     <Content Include="Views\FindSearchDemo\ProjectionResult.cshtml" />
+    <Content Include="Views\MyPackage\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
