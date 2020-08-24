@@ -1,4 +1,5 @@
 ﻿@using EPiServer.Commerce.Catalog.ContentTypes
+@using Mediachase.Commerce.Pricing
 @model CommerceTraining.Models.ViewModels.DemoMarketsViewModel
 
 @{
@@ -12,14 +13,15 @@
     @Html.DropDownListFor(m => m.SelectedMarket,
     new SelectList(Model.MarketList, "MarketId", "MarketName"),
     "-Please select a Market-",
-    new { @onchange = "this.form.submit();" })
+    new { @onchange = "this.form.submit();"})
 }
 
 <h4>Current Market Selected: @Model.SelectedMarket.MarketName</h4>
 <h4>Shirt Details</h4>
 @Html.PropertyFor(m => m.Shirt.Name)
-Price based on current market: @Model.Shirt.GetDefaultPrice().UnitPrice.ToString()
-
+<p>
+    Price based on current market: @Model.Shirt.GetDefaultPrice().UnitPrice.ToString()
+</p>
 <h4>List of Taxes Applied</h4>
 <ul>
     @foreach (var tax in Model.Taxes)
@@ -28,8 +30,62 @@ Price based on current market: @Model.Shirt.GetDefaultPrice().UnitPrice.ToString
     }
 </ul>
 <p>
-    Tax amount from old school method: @(Model.TaxAmountOldSchool != null ? Model.TaxAmountOldSchool.ToString() : "N/A")
+    Tax amount from old school method:
+    @(Model.TaxAmountOldSchool != null ? Model.TaxAmountOldSchool.ToString() : "N/A")
 </p>
 <p>
-    Tax amount from ITaxCalculator: @(Model.TaxAmount != null ? Model.TaxAmount.ToString() : "N/A")
+    Tax amount from ITaxCalculator:
+    @(Model.TaxAmount != null ? Model.TaxAmount.ToString() : "N/A")
 </p>
+<h4>Optimized Unfiltered Price List</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Market</th>
+            <th scope="col">Price Type</th>
+            <th scope="col">Sale Code</th>
+            <th scope="col">Min. Quantity</th>
+            <th scope="col">Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OptimizedPrices)
+        {
+            <tr>
+                <th scope="row">@item.MarketId.Value</th>
+                <td>@item.CustomerPricing.PriceTypeId</td>
+                <td>@item.CustomerPricing.PriceCode</td>
+                <td>@item.MinQuantity.ToString("F0")</td>
+                <td>@item.UnitPrice.ToString()</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<h4>Filtered Price List</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Market</th>
+            <th scope="col">Price Type</th>
+            <th scope="col">Sale Code</th>
+            <th scope="col">Min. Quantity</th>
+            <th scope="col">Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.FilteredPrices)
+        {
+        <tr>
+            <th scope="row">@item.MarketId.Value</th>
+            <td>@item.CustomerPricing.PriceTypeId</td>
+            <td>@item.CustomerPricing.PriceCode</td>
+            <td>@item.MinQuantity.ToString("F0")</td>
+            <td>@item.UnitPrice.ToString()</td>
+        </tr>
+        }
+    </tbody>
+</table>
+<h4>Promotions Total: @Model.PromotionsTotal%</h4>
+<h4>@(Model.PromotionsApplied ? "Promotion discount applied" : "Promotion discount not allowed")</h4>
+<h4>Selling Price: @Model.SellingPrice.ToString()</h4>
+<div style="height: 100px;"></div>

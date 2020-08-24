@@ -184,7 +184,8 @@ namespace CommerceTraining.Infrastructure
         public void ConfigureContainer(ServiceConfigurationContext context)
         {
             DependencyResolver.SetResolver(new StructureMapDependencyResolver(context.StructureMap()));
-            
+
+            context.Services.AddSingleton<IPriceOptimizer, DemoPriceOptimizer>();
         }
 
         public void Register(TemplateModelCollection viewTemplateModelRegistrator)

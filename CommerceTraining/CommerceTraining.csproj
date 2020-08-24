@@ -454,6 +454,7 @@
     <Compile Include="Infrastructure\Pricing\CommonHelper.cs" />
     <Compile Include="Infrastructure\Pricing\CustomIPriceOptimizer.cs" />
     <Compile Include="Infrastructure\Pricing\CustomStoreHelper.cs" />
+    <Compile Include="Infrastructure\Pricing\DemoPriceOptimizer.cs" />
     <Compile Include="Infrastructure\Pricing\MyPriceCalculator.cs" />
     <Compile Include="Infrastructure\Pricing\MyPriceService.cs" />
     <Compile Include="Infrastructure\Pricing\PricingEvents.cs" />
